@@ -488,6 +488,12 @@ body {
   color: var(--accent-cyan);
 }
 
+.swapper-banner.waiting-banner {
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.2) 0%, rgba(234, 179, 8, 0.2) 100%);
+  border-color: var(--accent-amber);
+  color: var(--accent-amber);
+}
+
 .swapper-arm-icon {
   animation: move-arm 0.8s infinite alternate ease-in-out;
 }

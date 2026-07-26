@@ -84,7 +84,7 @@ function renderTelemetry(data) {
   renderQueue(queue);
 }
 
-// Render Printer Nodes (Custom CoreXY FDM)
+// Render Printer Nodes (Node 1, Node 2, Node 3, Node 4)
 function renderPrinterGrid(nodes) {
   const gridContainer = document.getElementById("printer-grid");
   if (!gridContainer) return;
@@ -94,8 +94,9 @@ function renderPrinterGrid(nodes) {
 
   nodeKeys.forEach((nodeId) => {
     const node = nodes[nodeId];
-    const statusClass = node.status.toLowerCase();
+    const statusClass = node.status.toLowerCase().replace(/\s+/g, '-');
     const isEjecting = node.status === "EJECTING";
+    const isWaitingEject = node.status === "WAITING FOR EJECT";
     const job = node.current_job;
 
     html += `
@@ -103,7 +104,6 @@ function renderPrinterGrid(nodes) {
         <div class="printer-card-header">
           <div class="node-identity">
             <span class="node-name">${node.name}</span>
-            <span class="node-type">${node.node_type} • ${node.build_volume}</span>
           </div>
           <span class="status-badge ${statusClass}">${node.status}</span>
         </div>
@@ -112,6 +112,13 @@ function renderPrinterGrid(nodes) {
           <div class="swapper-banner">
             <span>EJECTING PLATE... SWAPPER MECHANISM ACTIVE</span>
             <strong>${node.eject_countdown_s}s</strong>
+          </div>
+        ` : ""}
+
+        ${isWaitingEject ? `
+          <div class="swapper-banner waiting-banner">
+            <span>WAITING FOR EJECTOR (QUEUED IN LINE)</span>
+            <strong>WAITING...</strong>
           </div>
         ` : ""}
 
@@ -166,7 +173,7 @@ function renderPrinterGrid(nodes) {
   gridContainer.innerHTML = html;
 }
 
-// Render Consumables & Spool Tracking (Nozzle wear & bed health removed)
+// Render Consumables & Spool Tracking
 function renderConsumables(nodes) {
   const container = document.getElementById("consumables-list");
   if (!container) return;
@@ -189,7 +196,7 @@ function renderConsumables(nodes) {
           <div class="spool-bar-fill" style="width: ${spool.pct}%; background-color: ${spool.color}"></div>
         </div>
         <div class="job-meta-footer" style="margin-top: 0.3rem;">
-          <span>SPOOL COLOR: <strong style="color: ${spool.color}">${spool.type}</strong></span>
+          <span>SPOOL MATERIAL: <strong style="color: ${spool.color}">${spool.type}</strong></span>
           <a href="#" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600;" onclick="triggerNodeAction('${node.node_id}', 'restock_spool'); return false;">+ Restock Spool</a>
         </div>
       </div>
@@ -231,7 +238,7 @@ function renderQueue(queue) {
 }
 
 // --------------------------------------------------------------------------
-// Zero-Touch CAD Drag & Drop Handler & Automation Pipeline
+// Drag & Drop Handler & Automation Pipeline
 // --------------------------------------------------------------------------
 function initDragAndDrop() {
   const dropZone = document.getElementById("drop-zone");
@@ -263,7 +270,6 @@ function initDragAndDrop() {
   });
 }
 
-// Preset Buttons Handler - Uses event.stopPropagation() so file picker modal is never opened!
 function triggerPresetDrop(e, filename, sizeKb) {
   if (e && e.stopPropagation) {
     e.stopPropagation();
@@ -271,7 +277,6 @@ function triggerPresetDrop(e, filename, sizeKb) {
   handleCADFileUpload({ name: filename, size: sizeKb * 1024 });
 }
 
-// Process CAD File & Pipeline Simulation
 async function handleCADFileUpload(file) {
   const overlay = document.getElementById("pipeline-overlay");
   overlay.classList.remove("hidden");

@@ -118,8 +118,7 @@ async def printer_action(node_id: str, action: str = Form(...)):
     node = farm_manager.nodes[node_id]
     
     if action == "force_eject":
-        node.status = "EJECTING"
-        node.eject_countdown_s = 5
+        farm_manager.request_ejection(node_id)
     elif action == "pause":
         if node.status == "PRINTING":
             node.status = "PAUSED"

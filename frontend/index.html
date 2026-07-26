@@ -49,7 +49,7 @@
     <!-- Main Content Layout Grid -->
     <main class="dashboard-grid">
       
-      <!-- Top Hero Section: Zero-Touch Drop Zone & Quick Presets -->
+      <!-- Top Hero Section: File Upload & Quick Presets -->
       <section class="zero-touch-section">
         <div class="drop-zone-card" id="drop-zone">
           <input type="file" id="file-input" hidden accept=".stl,.step,.3mf,.gcode,.obj,.sldprt">
@@ -65,24 +65,24 @@
             </div>
             
             <div class="drop-text-group">
-              <h2 class="drop-title">ZERO-TOUCH CAD DROP ZONE</h2>
+              <h2 class="drop-title">FILE UPLOAD</h2>
               <p class="drop-subtitle">Drag & Drop CAD file (.3MF, .STL, .STEP) for instant auto-slicing & fleet routing</p>
             </div>
           </div>
 
-          <!-- Pipeline Processing Overlay (Visible on Upload) -->
+          <!-- Pipeline Processing Overlay -->
           <div class="pipeline-overlay hidden" id="pipeline-overlay">
             <div class="pipeline-loader"></div>
             <div class="pipeline-steps">
               <div class="step-item active" id="step-1"><span class="step-num">01</span> Validating Geometry & Mesh Integrity...</div>
-              <div class="step-item" id="step-2"><span class="step-num">02</span> Auto-Slicing via Klipper Core Engine (G-Code)...</div>
+              <div class="step-item" id="step-2"><span class="step-num">02</span> Auto-Slicing via Klipper Engine (G-Code)...</div>
               <div class="step-item" id="step-3"><span class="step-num">03</span> Calculating Filament Mass & Thermal Requirements...</div>
-              <div class="step-item" id="step-4"><span class="step-num">04</span> Finding Available CoreXY Node & Queueing Job...</div>
+              <div class="step-item" id="step-4"><span class="step-num">04</span> Finding Available Node & Queueing Job...</div>
             </div>
           </div>
         </div>
 
-        <!-- Quick Preset Drop Container (Placed outside Drop Zone so clicking preset buttons won't open file picker!) -->
+        <!-- Quick Preset Drop Container -->
         <div class="quick-preset-bar">
           <span class="quick-preset-label">SIMULATE INSTANT DROP:</span>
           <button class="preset-btn" onclick="triggerPresetDrop(event, 'Turbine_Impeller_V4.3mf', 5400)">+ Drop Turbine_Impeller.3mf</button>
@@ -98,13 +98,13 @@
         <section class="fleet-rack-section">
           <div class="section-header">
             <h3 class="section-title">
-              <span class="icon">🖨️</span> CORE XY BETA RACK TELEMETRY
+              <span class="icon">🖨️</span> FARM TELEMETRY
             </h3>
             <div class="rack-badge">LIVE WEBSOCKET STREAM (10 Hz)</div>
           </div>
 
           <div class="printer-grid" id="printer-grid">
-            <div class="printer-card-skeleton">Initializing CoreXY Rack Telemetry...</div>
+            <div class="printer-card-skeleton">Initializing Farm Telemetry...</div>
           </div>
         </section>
 
@@ -144,8 +144,8 @@
     <!-- Footer Status Bar -->
     <footer class="app-footer">
       <div class="footer-item">OPERATIONAL MODE: <span class="text-emerald">FULLY AUTONOMOUS</span></div>
-      <div class="footer-item">SWAPPER MECHANISM: <span class="text-cyan">AUTOMATED EJECTOR READY</span></div>
-      <div class="footer-item">ARCHITECTURE: <span class="text-purple">CUSTOM CORE XY RACK</span></div>
+      <div class="footer-item">SWAPPER MECHANISM: <span class="text-cyan">SINGLE-PLATE EJECTION QUEUE READY</span></div>
+      <div class="footer-item">FLEET ARCHITECTURE: <span class="text-purple">NODE 1 - 4 RACK</span></div>
     </footer>
   </div>
 
