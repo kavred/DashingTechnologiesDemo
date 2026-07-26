@@ -112,7 +112,14 @@ async def demo_upload(req: DemoCADRequest):
     return {"status": "success", "job": job}
 
 @app.post("/api/printers/{node_id}/action")
-async def printer_action(node_id: str, action: str = Form(...)):
+async def printer_action(
+    node_id: str,
+    action: str = Form(...),
+    brand: str = Form(None),
+    material: str = Form(None),
+    color: str = Form(None),
+    weight: float = Form(None)
+):
     if node_id not in farm_manager.nodes:
         raise HTTPException(status_code=404, detail="Printer Node not found")
     node = farm_manager.nodes[node_id]
@@ -130,7 +137,13 @@ async def printer_action(node_id: str, action: str = Form(...)):
         node.current_job = None
         node.progress = 0.0
     elif action == "restock_spool":
-        node.spool_remaining_g = 1000.0
+        spool_weight = weight if weight else 1000.0
+        node.spool_remaining_g = spool_weight
+        node.spool_capacity_g = spool_weight
+        if material:
+            node.spool_type = f"{brand} {material}" if brand else material
+        if color:
+            node.spool_color = color
     return {"status": "success", "node": node.to_dict()}
 
 @app.delete("/api/queue/{job_id}")

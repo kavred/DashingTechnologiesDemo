@@ -9,81 +9,18 @@ let currentTelemetry = null;
 let isDemoSimulatorMode = false;
 let demoSimulatorInterval = null;
 
-// Standalone Demo Simulator State
+// Standalone Demo Simulator State (Blank Slate Initial State)
 let demoState = {
   active_ejecting_node: null,
   ejection_queue: [],
-  total_cad_dispatched: 89,
-  total_processed_today: 142,
+  total_cad_dispatched: 0,
+  total_processed_today: 0,
   nodes: {
     "node-01": {
       node_id: "node-01",
       name: "Node 1",
-      status: "PRINTING",
-      current_hotend_temp: 219.8,
-      target_hotend_temp: 220.0,
-      current_bed_temp: 60.0,
-      target_bed_temp: 60.0,
-      chamber_temp: 34.2,
-      fan_rpm: 5800,
-      extruding_rate: 18.4,
-      progress: 55.0,
-      current_layer: 154,
-      total_layers: 280,
-      elapsed_time_s: 19,
-      estimated_duration_s: 35,
-      eject_countdown_s: 0,
-      spool: { remaining_g: 820.5, capacity_g: 1000.0, pct: 82.1, type: "PLA+ Tough Black", color: "#10b981" },
-      plates_ejected: 42,
-      current_job: { job_id: "JOB-9039", filename: "Rocket_Nozzle_Bracket.stl", file_type: "STL", mass_g: 52.0, total_layers: 280, estimated_duration_s: 35 }
-    },
-    "node-02": {
-      node_id: "node-02",
-      name: "Node 2",
-      status: "PRINTING",
-      current_hotend_temp: 239.5,
-      target_hotend_temp: 240.0,
-      current_bed_temp: 74.8,
-      target_bed_temp: 75.0,
-      chamber_temp: 38.5,
-      fan_rpm: 6200,
-      extruding_rate: 21.0,
-      progress: 90.0,
-      current_layer: 450,
-      total_layers: 500,
-      elapsed_time_s: 36,
-      estimated_duration_s: 40,
-      eject_countdown_s: 0,
-      spool: { remaining_g: 740.0, capacity_g: 1000.0, pct: 74.0, type: "PETG Carbon", color: "#3b82f6" },
-      plates_ejected: 68,
-      current_job: { job_id: "JOB-9040", filename: "Cyber_Chassis_Plate.3mf", file_type: "3MF", mass_g: 110.0, total_layers: 500, estimated_duration_s: 40 }
-    },
-    "node-03": {
-      node_id: "node-03",
-      name: "Node 3",
       status: "IDLE",
       current_hotend_temp: 24.0,
-      target_hotend_temp: 0.0,
-      current_bed_temp: 22.5,
-      target_bed_temp: 0.0,
-      chamber_temp: 24.0,
-      fan_rpm: 0,
-      extruding_rate: 0.0,
-      progress: 0.0,
-      current_layer: 0,
-      total_layers: 0,
-      elapsed_time_s: 0,
-      estimated_duration_s: 0,
-      eject_countdown_s: 0,
-      spool: { remaining_g: 910.0, capacity_g: 1000.0, pct: 91.0, type: "ABS White", color: "#a855f7" },
-      plates_ejected: 19,
-      current_job: null
-    },
-    "node-04": {
-      node_id: "node-04",
-      name: "Node 4",
-      status: "IDLE",
-      current_hotend_temp: 23.5,
       target_hotend_temp: 0.0,
       current_bed_temp: 22.0,
       target_bed_temp: 0.0,
@@ -96,44 +33,84 @@ let demoState = {
       elapsed_time_s: 0,
       estimated_duration_s: 0,
       eject_countdown_s: 0,
-      spool: { remaining_g: 650.0, capacity_g: 1000.0, pct: 65.0, type: "TPU Orange", color: "#f59e0b" },
-      plates_ejected: 31,
+      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "PLA+ Tough Black", color: "#10b981" },
+      plates_ejected: 0,
+      current_job: null
+    },
+    "node-02": {
+      node_id: "node-02",
+      name: "Node 2",
+      status: "IDLE",
+      current_hotend_temp: 24.0,
+      target_hotend_temp: 0.0,
+      current_bed_temp: 22.0,
+      target_bed_temp: 0.0,
+      chamber_temp: 24.0,
+      fan_rpm: 0,
+      extruding_rate: 0.0,
+      progress: 0.0,
+      current_layer: 0,
+      total_layers: 0,
+      elapsed_time_s: 0,
+      estimated_duration_s: 0,
+      eject_countdown_s: 0,
+      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "PETG Carbon", color: "#3b82f6" },
+      plates_ejected: 0,
+      current_job: null
+    },
+    "node-03": {
+      node_id: "node-03",
+      name: "Node 3",
+      status: "IDLE",
+      current_hotend_temp: 24.0,
+      target_hotend_temp: 0.0,
+      current_bed_temp: 22.0,
+      target_bed_temp: 0.0,
+      chamber_temp: 24.0,
+      fan_rpm: 0,
+      extruding_rate: 0.0,
+      progress: 0.0,
+      current_layer: 0,
+      total_layers: 0,
+      elapsed_time_s: 0,
+      estimated_duration_s: 0,
+      eject_countdown_s: 0,
+      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "ABS White", color: "#a855f7" },
+      plates_ejected: 0,
+      current_job: null
+    },
+    "node-04": {
+      node_id: "node-04",
+      name: "Node 4",
+      status: "IDLE",
+      current_hotend_temp: 24.0,
+      target_hotend_temp: 0.0,
+      current_bed_temp: 22.0,
+      target_bed_temp: 0.0,
+      chamber_temp: 24.0,
+      fan_rpm: 0,
+      extruding_rate: 0.0,
+      progress: 0.0,
+      current_layer: 0,
+      total_layers: 0,
+      elapsed_time_s: 0,
+      estimated_duration_s: 0,
+      eject_countdown_s: 0,
+      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "TPU Orange", color: "#f59e0b" },
+      plates_ejected: 0,
       current_job: null
     }
   },
-  queue: [
-    {
-      job_id: "JOB-9041",
-      filename: "Turbine_Impeller_v3.3mf",
-      file_type: "3MF",
-      mass_g: 64.2,
-      total_layers: 310,
-      estimated_duration_s: 35,
-      target_hotend: 225.0,
-      target_bed: 60.0,
-      priority: "HIGH",
-      created_at: "11:00:15",
-      auto_routed_node: "Node 1"
-    },
-    {
-      job_id: "JOB-9042",
-      filename: "Drone_Arm_Mount_Reinforced.stl",
-      file_type: "STL",
-      mass_g: 88.5,
-      total_layers: 420,
-      estimated_duration_s: 45,
-      target_hotend: 240.0,
-      target_bed: 75.0,
-      priority: "NORMAL",
-      created_at: "11:01:02",
-      auto_routed_node: "Node 2"
-    }
-  ]
+  queue: []
 };
 
 // Initialize App on DOM Loaded
 document.addEventListener("DOMContentLoaded", () => {
   initDragAndDrop();
+
+  // Render initial telemetry snapshot instantly on page load (0ms delay!)
+  const initialTelemetry = getDemoTelemetrySnapshot();
+  renderTelemetry(initialTelemetry);
 
   // If hosted on GitHub Pages or static host, start client simulator directly, or try WS with fast fallback
   const isGitHubPages = window.location.hostname.includes("github.io") || window.location.protocol === "file:";
@@ -163,7 +140,7 @@ function initWebSocket() {
       if (ws) ws.close();
       startDemoSimulatorMode("ONLINE (DEMO SIMULATOR STREAM)");
     }
-  }, 2500);
+  }, 400);
 
   try {
     ws = new WebSocket(wsUrl);
@@ -220,6 +197,9 @@ function startDemoSimulatorMode(statusLabel = "ONLINE (GITHUB PAGES DEMO STREAM)
 
   if (statusText) statusText.textContent = statusLabel;
   if (indicator) indicator.style.backgroundColor = "#10b981";
+
+  // Render initial frame immediately without waiting for first interval
+  renderTelemetry(getDemoTelemetrySnapshot());
 
   if (demoSimulatorInterval) clearInterval(demoSimulatorInterval);
 
@@ -385,10 +365,25 @@ function renderTelemetry(data) {
   const statActive = document.getElementById("stat-active-nodes");
   const statPlates = document.getElementById("stat-plates-ejected");
   const statCad = document.getElementById("stat-cad-dispatched");
+  const swapperStatusEl = document.getElementById("footer-swapper-status");
 
   if (statActive) statActive.textContent = `${fleet.active_nodes} / ${fleet.total_nodes} ACTIVE`;
   if (statPlates) statPlates.textContent = fleet.total_plates_ejected || 0;
   if (statCad) statCad.textContent = fleet.total_cad_dispatched || 0;
+
+  // Update Footer Swapper Mechanism Status
+  if (swapperStatusEl) {
+    const isSwapperActive = (fleet.active_ejecting_node !== null && fleet.active_ejecting_node !== undefined) ||
+                            (fleet.ejection_queue_length && fleet.ejection_queue_length > 0) ||
+                            Object.values(nodes).some(n => n.status === "EJECTING" || n.status === "WAITING FOR EJECT");
+    if (isSwapperActive) {
+      swapperStatusEl.className = "text-amber";
+      swapperStatusEl.textContent = "IN USE";
+    } else {
+      swapperStatusEl.className = "text-cyan";
+      swapperStatusEl.textContent = "READY";
+    }
+  }
 
   renderPrinterGrid(nodes);
   renderConsumables(nodes);
@@ -471,11 +466,13 @@ function renderPrinterGrid(nodes) {
 
         <!-- Manual Actions -->
         <div class="card-actions">
-          <button class="action-btn eject-btn" onclick="triggerNodeAction('${node.node_id}', 'force_eject')">Eject plate</button>
-          <button class="action-btn" onclick="triggerNodeAction('${node.node_id}', '${node.status === 'PAUSED' ? 'resume' : 'pause'}')">
-            ${node.status === 'PAUSED' ? '▶ Resume' : '⏸ Pause'}
-          </button>
-          <button class="action-btn" onclick="triggerNodeAction('${node.node_id}', 'cancel')">⏹ Cancel</button>
+          ${isIdle ? `<button class="action-btn eject-btn" onclick="triggerNodeAction('${node.node_id}', 'force_eject')">⏏ Eject plate</button>` : ""}
+          ${isPrintActive ? `
+            <button class="action-btn" onclick="triggerNodeAction('${node.node_id}', '${node.status === 'PAUSED' ? 'resume' : 'pause'}')">
+              ${node.status === 'PAUSED' ? '▶ Resume' : '⏸ Pause'}
+            </button>
+            <button class="action-btn cancel-btn" onclick="triggerNodeAction('${node.node_id}', 'cancel')">⏹ Cancel</button>
+          ` : ""}
         </div>
       </div>
     `;
@@ -508,7 +505,7 @@ function renderConsumables(nodes) {
         </div>
         <div class="job-meta-footer" style="margin-top: 0.3rem;">
           <span>SPOOL MATERIAL: <strong style="color: ${spool.color}">${spool.type}</strong></span>
-          <a href="#" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600;" onclick="triggerNodeAction('${node.node_id}', 'restock_spool'); return false;">+ Restock Spool</a>
+          <a href="#" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600;" onclick="openRestockModal('${node.node_id}'); return false;">+ Restock Spool</a>
         </div>
       </div>
     `;
@@ -547,6 +544,89 @@ function renderQueue(queue) {
 
   container.innerHTML = html;
 }
+
+// --------------------------------------------------------------------------
+// Restock Filament Spool Specification Modal Logic
+// --------------------------------------------------------------------------
+function openRestockModal(nodeId) {
+  const modal = document.getElementById("restock-modal");
+  const hiddenId = document.getElementById("restock-node-id");
+  if (!modal || !hiddenId) return;
+
+  hiddenId.value = nodeId;
+
+  let currentNode = null;
+  if (isDemoSimulatorMode && demoState.nodes[nodeId]) {
+    currentNode = demoState.nodes[nodeId];
+  } else if (currentTelemetry && currentTelemetry.nodes && currentTelemetry.nodes[nodeId]) {
+    currentNode = currentTelemetry.nodes[nodeId];
+  }
+
+  if (currentNode && currentNode.spool) {
+    const spool = currentNode.spool;
+    if (spool.color) document.getElementById("spool-color").value = spool.color;
+    if (spool.capacity_g) document.getElementById("spool-weight").value = spool.capacity_g;
+  } else {
+    document.getElementById("spool-weight").value = 1000;
+  }
+
+  modal.classList.remove("hidden");
+}
+
+function closeRestockModal() {
+  const modal = document.getElementById("restock-modal");
+  if (modal) modal.classList.add("hidden");
+}
+
+function setRestockColor(hex) {
+  const colorInput = document.getElementById("spool-color");
+  if (colorInput) colorInput.value = hex;
+}
+
+async function handleRestockSubmit(event) {
+  event.preventDefault();
+  const nodeId = document.getElementById("restock-node-id").value;
+  const brand = document.getElementById("spool-brand").value;
+  const material = document.getElementById("spool-material").value;
+  const color = document.getElementById("spool-color").value;
+  const weight = parseFloat(document.getElementById("spool-weight").value) || 1000.0;
+
+  if (isDemoSimulatorMode) {
+    const node = demoState.nodes[nodeId];
+    if (node) {
+      node.spool = {
+        remaining_g: weight,
+        capacity_g: weight,
+        pct: 100.0,
+        type: `${brand} ${material}`,
+        color: color
+      };
+      renderTelemetry(getDemoTelemetrySnapshot());
+    }
+  } else {
+    try {
+      const formData = new FormData();
+      formData.append("action", "restock_spool");
+      formData.append("brand", brand);
+      formData.append("material", material);
+      formData.append("color", color);
+      formData.append("weight", weight.toString());
+
+      await fetch(`/api/printers/${nodeId}/action`, {
+        method: "POST",
+        body: formData
+      });
+    } catch (err) {
+      console.error("Restock spool API call failed:", err);
+    }
+  }
+
+  closeRestockModal();
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeRestockModal();
+});
 
 // --------------------------------------------------------------------------
 // Drag & Drop Handler & Automation Pipeline

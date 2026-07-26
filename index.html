@@ -134,9 +134,76 @@
     <!-- Footer Status Bar -->
     <footer class="app-footer">
       <div class="footer-item">OPERATIONAL MODE: <span class="text-emerald">FULLY AUTONOMOUS</span></div>
-      <div class="footer-item">SWAPPER MECHANISM: <span class="text-cyan">READY</span></div>
+      <div class="footer-item">SWAPPER MECHANISM: <span class="text-cyan" id="footer-swapper-status">READY</span></div>
       <div class="footer-item">FLEET ARCHITECTURE: <span class="text-purple">NODE 1 - 4 RACK</span></div>
     </footer>
+  </div>
+
+  <!-- Restock Filament Modal Overlay -->
+  <div class="modal-overlay hidden" id="restock-modal" onclick="if(event.target === this) closeRestockModal()">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">RESTOCK FILAMENT SPOOL</h3>
+        <button class="modal-close-btn" onclick="closeRestockModal()">✕</button>
+      </div>
+      
+      <form id="restock-form" onsubmit="handleRestockSubmit(event)">
+        <input type="hidden" id="restock-node-id" value="">
+        
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="spool-brand">Brand / Manufacturer</label>
+            <select id="spool-brand" class="form-control">
+              <option value="Bambu Lab">Bambu Lab</option>
+              <option value="PolyMaker">PolyMaker</option>
+              <option value="eSUN">eSUN</option>
+              <option value="Prusament">Prusament</option>
+              <option value="Hatchbox">Hatchbox</option>
+              <option value="Sunlu">Sunlu</option>
+              <option value="OEM">OEM / Generic</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="spool-material">Filament Material</label>
+            <select id="spool-material" class="form-control">
+              <option value="PLA+ Tough">PLA+ Tough</option>
+              <option value="PETG Carbon">PETG Carbon</option>
+              <option value="ABS White">ABS White</option>
+              <option value="TPU 95A">TPU 95A</option>
+              <option value="ASA Aero">ASA Aero</option>
+              <option value="PC-CF">PC-CF</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Spool Color</label>
+            <div class="color-picker-group">
+              <input type="color" id="spool-color" value="#10b981" class="color-input">
+              <div class="preset-colors">
+                <span class="color-swatch" style="background:#10b981" title="Emerald Green" onclick="setRestockColor('#10b981')"></span>
+                <span class="color-swatch" style="background:#3b82f6" title="Cyber Blue" onclick="setRestockColor('#3b82f6')"></span>
+                <span class="color-swatch" style="background:#a855f7" title="Neon Purple" onclick="setRestockColor('#a855f7')"></span>
+                <span class="color-swatch" style="background:#f59e0b" title="Amber Orange" onclick="setRestockColor('#f59e0b')"></span>
+                <span class="color-swatch" style="background:#ef4444" title="Crimson Red" onclick="setRestockColor('#ef4444')"></span>
+                <span class="color-swatch" style="background:#ffffff" title="Pure White" onclick="setRestockColor('#ffffff')"></span>
+                <span class="color-swatch" style="background:#1e293b" title="Dark Charcoal" onclick="setRestockColor('#1e293b')"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="spool-weight">Spool Net Weight (grams)</label>
+            <input type="number" id="spool-weight" class="form-control" value="1000" min="100" max="5000" step="50" required>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeRestockModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">⚡ Load New Spool</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <script src="app.js"></script>

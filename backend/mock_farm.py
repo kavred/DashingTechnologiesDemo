@@ -41,7 +41,7 @@ class MockPrinterNode:
         self.spool_capacity_g = 1000.0
         self.spool_type = spool_type
         self.spool_color = spool_color
-        self.total_plates_ejected = random.randint(14, 89)
+        self.total_plates_ejected = 0
 
     def assign_job(self, job: dict):
         """Assigns a job and sets printer to preheating."""
@@ -139,71 +139,11 @@ class PrintFarmManager:
         self.active_ejecting_node_id: Optional[str] = None
         self.ejection_queue: List[str] = [] # List of node_ids waiting to eject
         
-        # Global Print Jobs Queue
-        self.global_queue: List[dict] = [
-            {
-                "job_id": "JOB-9041",
-                "filename": "Turbine_Impeller_v3.3mf",
-                "file_type": "3MF",
-                "mass_g": 64.2,
-                "total_layers": 310,
-                "estimated_duration_s": 35,
-                "target_hotend": 225.0,
-                "target_bed": 60.0,
-                "priority": "HIGH",
-                "created_at": "11:00:15",
-                "auto_routed_node": "Node 1"
-            },
-            {
-                "job_id": "JOB-9042",
-                "filename": "Drone_Arm_Mount_Reinforced.stl",
-                "file_type": "STL",
-                "mass_g": 88.5,
-                "total_layers": 420,
-                "estimated_duration_s": 45,
-                "target_hotend": 240.0,
-                "target_bed": 75.0,
-                "priority": "NORMAL",
-                "created_at": "11:01:02",
-                "auto_routed_node": "Node 2"
-            }
-        ]
+        # Global Print Jobs Queue - Starts Empty for Blank Slate
+        self.global_queue: List[dict] = []
         
-        # Pre-load initial active jobs
-        self.nodes["node-01"].assign_job({
-            "job_id": "JOB-9039",
-            "filename": "Rocket_Nozzle_Bracket.stl",
-            "file_type": "STL",
-            "mass_g": 52.0,
-            "total_layers": 280,
-            "estimated_duration_s": 35,
-            "target_hotend": 220.0,
-            "target_bed": 60.0
-        })
-        self.nodes["node-01"].status = "PRINTING"
-        self.nodes["node-01"].current_hotend_temp = 219.8
-        self.nodes["node-01"].current_bed_temp = 60.0
-        self.nodes["node-01"].progress = 55.0
-        self.nodes["node-01"].elapsed_time_s = 19
-
-        self.nodes["node-02"].assign_job({
-            "job_id": "JOB-9040",
-            "filename": "Cyber_Chassis_Plate.3mf",
-            "file_type": "3MF",
-            "mass_g": 110.0,
-            "total_layers": 500,
-            "estimated_duration_s": 40,
-            "target_hotend": 240.0,
-            "target_bed": 75.0
-        })
-        self.nodes["node-02"].status = "PRINTING"
-        self.nodes["node-02"].current_hotend_temp = 239.5
-        self.nodes["node-02"].current_bed_temp = 74.8
-        self.nodes["node-02"].progress = 90.0
-        self.nodes["node-02"].elapsed_time_s = 36
-
-        self.total_processed_today = 142
-        self.total_cad_dispatched = 89
+        self.total_processed_today = 0
+        self.total_cad_dispatched = 0
 
     def request_ejection(self, node_id: str):
         """
