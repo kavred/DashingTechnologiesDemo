@@ -403,6 +403,7 @@ body {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: clamp(0.8rem, 1.4vw, 1.4rem);
+  min-height: clamp(300px, 50vh, 600px);
 }
 
 @media (max-width: 768px) {

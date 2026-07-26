@@ -401,6 +401,8 @@ function renderPrinterGrid(nodes) {
   nodeKeys.forEach((nodeId) => {
     const node = nodes[nodeId];
     const statusClass = node.status.toLowerCase().replace(/\s+/g, '-');
+    const isIdle = node.status === "IDLE";
+    const isPrintActive = ["PRINTING", "PAUSED", "PREHEATING"].includes(node.status);
     const isEjecting = node.status === "EJECTING";
     const isWaitingEject = node.status === "WAITING FOR EJECT";
     const job = node.current_job;
