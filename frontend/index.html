@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DASING LABS // Autonomous Print Farm OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-logo">
+          <span class="brand-name">DASING LABS</span>
+        </div>
+        <div class="system-tag">AUTOPRINT OS // FLEET CONTROL v2.4</div>
+      </div>
+
+      <div class="header-stats">
+        <div class="stat-pill">
+          <span class="stat-label">FLEET STATUS</span>
+          <span class="stat-value text-emerald" id="stat-active-nodes">4 / 4 ONLINE</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-label">PLATES EJECTED</span>
+          <span class="stat-value text-cyan" id="stat-plates-ejected">0</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-label">CAD DISPATCHED</span>
+          <span class="stat-value text-purple" id="stat-cad-dispatched">0</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-label">FARM HEALTH</span>
+          <span class="stat-value text-emerald" id="stat-health-score">98.4%</span>
+        </div>
+      </div>
+
+      <div class="ws-pulse-container">
+        <span class="ws-pulse-dot" id="ws-indicator"></span>
+        <span class="ws-pulse-text" id="ws-status-text">CONNECTING...</span>
+      </div>
+    </header>
+
+    <!-- Main Content Layout Grid -->
+    <main class="dashboard-grid">
+      
+      <!-- Top Hero Section: Zero-Touch Drop Zone & Quick Presets -->
+      <section class="zero-touch-section">
+        <div class="drop-zone-card" id="drop-zone">
+          <input type="file" id="file-input" hidden accept=".stl,.step,.3mf,.gcode,.obj,.sldprt">
+          
+          <div class="drop-zone-content">
+            <div class="drop-icon-wrapper">
+              <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <div class="pulse-ring"></div>
+            </div>
+            
+            <div class="drop-text-group">
+              <h2 class="drop-title">ZERO-TOUCH CAD DROP ZONE</h2>
+              <p class="drop-subtitle">Drag & Drop CAD file (.3MF, .STL, .STEP) for instant auto-slicing & fleet routing</p>
+            </div>
+          </div>
+
+          <!-- Pipeline Processing Overlay (Visible on Upload) -->
+          <div class="pipeline-overlay hidden" id="pipeline-overlay">
+            <div class="pipeline-loader"></div>
+            <div class="pipeline-steps">
+              <div class="step-item active" id="step-1"><span class="step-num">01</span> Validating Geometry & Mesh Integrity...</div>
+              <div class="step-item" id="step-2"><span class="step-num">02</span> Auto-Slicing via Klipper Core Engine (G-Code)...</div>
+              <div class="step-item" id="step-3"><span class="step-num">03</span> Calculating Filament Mass & Thermal Requirements...</div>
+              <div class="step-item" id="step-4"><span class="step-num">04</span> Finding Available CoreXY Node & Queueing Job...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Preset Drop Container (Placed outside Drop Zone so clicking preset buttons won't open file picker!) -->
+        <div class="quick-preset-bar">
+          <span class="quick-preset-label">SIMULATE INSTANT DROP:</span>
+          <button class="preset-btn" onclick="triggerPresetDrop(event, 'Turbine_Impeller_V4.3mf', 5400)">+ Drop Turbine_Impeller.3mf</button>
+          <button class="preset-btn" onclick="triggerPresetDrop(event, 'Drone_Motor_Chassis.step', 8200)">+ Drop Drone_Chassis.step</button>
+          <button class="preset-btn" onclick="triggerPresetDrop(event, 'Surgical_Guide_Plate.stl', 3100)">+ Drop Surgical_Guide.stl</button>
+        </div>
+      </section>
+
+      <!-- Center & Lower Section: Fleet Telemetry & Sidebar Panels -->
+      <div class="fleet-content-split">
+        
+        <!-- Left: 4-Printer Beta Rack Grid -->
+        <section class="fleet-rack-section">
+          <div class="section-header">
+            <h3 class="section-title">
+              <span class="icon">🖨️</span> CORE XY BETA RACK TELEMETRY
+            </h3>
+            <div class="rack-badge">LIVE WEBSOCKET STREAM (10 Hz)</div>
+          </div>
+
+          <div class="printer-grid" id="printer-grid">
+            <div class="printer-card-skeleton">Initializing CoreXY Rack Telemetry...</div>
+          </div>
+        </section>
+
+        <!-- Right: Consumables & Global Queue -->
+        <aside class="sidebar-section">
+          
+          <!-- Consumables Tracking Card -->
+          <div class="side-card health-card">
+            <div class="side-card-header">
+              <h4 class="side-title">
+                <span class="icon">🧪</span> CONSUMABLES & FILAMENT USAGE
+              </h4>
+            </div>
+            <div class="consumables-list" id="consumables-list">
+              <!-- Dynamically populated per node -->
+            </div>
+          </div>
+
+          <!-- Global Queue Sidebar Card -->
+          <div class="side-card queue-card">
+            <div class="side-card-header">
+              <h4 class="side-title">
+                <span class="icon">📋</span> GLOBAL AUTOMATED QUEUE
+              </h4>
+              <span class="queue-count-badge" id="queue-count-badge">0 Pending</span>
+            </div>
+            <div class="queue-list" id="queue-list">
+              <div class="empty-queue-msg">Queue empty. Drop CAD files above to populate.</div>
+            </div>
+          </div>
+
+        </aside>
+
+      </div>
+    </main>
+
+    <!-- Footer Status Bar -->
+    <footer class="app-footer">
+      <div class="footer-item">OPERATIONAL MODE: <span class="text-emerald">FULLY AUTONOMOUS</span></div>
+      <div class="footer-item">SWAPPER MECHANISM: <span class="text-cyan">AUTOMATED EJECTOR READY</span></div>
+      <div class="footer-item">ARCHITECTURE: <span class="text-purple">CUSTOM CORE XY RACK</span></div>
+    </footer>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
