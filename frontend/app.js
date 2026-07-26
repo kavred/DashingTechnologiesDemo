@@ -77,7 +77,6 @@ function renderTelemetry(data) {
   document.getElementById("stat-active-nodes").textContent = `${fleet.active_nodes} / ${fleet.total_nodes} ACTIVE`;
   document.getElementById("stat-plates-ejected").textContent = fleet.total_plates_ejected || 0;
   document.getElementById("stat-cad-dispatched").textContent = fleet.total_cad_dispatched || 0;
-  document.getElementById("stat-health-score").textContent = `${fleet.farm_health_score || 98.4}%`;
 
   renderPrinterGrid(nodes);
   renderConsumables(nodes);
@@ -173,7 +172,7 @@ function renderPrinterGrid(nodes) {
   gridContainer.innerHTML = html;
 }
 
-// Render Consumables & Spool Tracking
+// Render Consumables & Spool Tracking (Just "Node 1", "Node 2", etc.)
 function renderConsumables(nodes) {
   const container = document.getElementById("consumables-list");
   if (!container) return;
@@ -188,7 +187,7 @@ function renderConsumables(nodes) {
         <div class="consumable-header">
           <span class="spool-name">
             <span class="spool-dot" style="background-color: ${spool.color}"></span>
-            ${node.name} (${spool.type})
+            ${node.name}
           </span>
           <span class="spool-val">${spool.remaining_g}g / ${spool.capacity_g}g (${spool.pct}%)</span>
         </div>
