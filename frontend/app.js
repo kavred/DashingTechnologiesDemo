@@ -33,7 +33,7 @@ let demoState = {
       elapsed_time_s: 0,
       estimated_duration_s: 0,
       eject_countdown_s: 0,
-      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "PLA+ Tough Black", color: "#10b981" },
+      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "PLA", color: "#10b981" },
       plates_ejected: 0,
       current_job: null
     },
@@ -54,7 +54,7 @@ let demoState = {
       elapsed_time_s: 0,
       estimated_duration_s: 0,
       eject_countdown_s: 0,
-      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "PETG Carbon", color: "#3b82f6" },
+      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "PETG", color: "#3b82f6" },
       plates_ejected: 0,
       current_job: null
     },
@@ -75,7 +75,7 @@ let demoState = {
       elapsed_time_s: 0,
       estimated_duration_s: 0,
       eject_countdown_s: 0,
-      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "ABS White", color: "#a855f7" },
+      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "ABS", color: "#a855f7" },
       plates_ejected: 0,
       current_job: null
     },
@@ -96,7 +96,7 @@ let demoState = {
       elapsed_time_s: 0,
       estimated_duration_s: 0,
       eject_countdown_s: 0,
-      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "TPU Orange", color: "#f59e0b" },
+      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "TPU", color: "#f59e0b" },
       plates_ejected: 0,
       current_job: null
     }
@@ -334,19 +334,22 @@ function getDemoTelemetrySnapshot() {
   const activeNodesCount = Object.values(nodes).filter(n => ["PREHEATING", "PRINTING", "EJECTING", "WAITING FOR EJECT"].includes(n.status)).length;
   const totalPlatesEjected = Object.values(nodes).reduce((acc, n) => acc + n.plates_ejected, 0);
 
+  const summary = {
+    active_nodes: activeNodesCount,
+    total_nodes: Object.keys(nodes).length,
+    queue_length: demoState.queue.length,
+    ejection_queue_length: demoState.ejection_queue.length,
+    active_ejecting_node: demoState.active_ejecting_node,
+    total_plates_ejected: totalPlatesEjected,
+    total_processed_today: demoState.total_processed_today + totalPlatesEjected,
+    total_cad_dispatched: demoState.total_cad_dispatched,
+    farm_health_score: 98.4
+  };
+
   return {
     timestamp: Date.now() / 1000,
-    fleet_summary: {
-      active_nodes: activeNodesCount,
-      total_nodes: Object.keys(nodes).length,
-      queue_length: demoState.queue.length,
-      ejection_queue_length: demoState.ejection_queue.length,
-      active_ejecting_node: demoState.active_ejecting_node,
-      total_plates_ejected: totalPlatesEjected,
-      total_processed_today: demoState.total_processed_today + totalPlatesEjected,
-      total_cad_dispatched: demoState.total_cad_dispatched,
-      farm_health_score: 98.4
-    },
+    farm_summary: summary,
+    fleet_summary: summary,
     nodes: nodes,
     queue: demoState.queue
   };
@@ -358,7 +361,7 @@ function getDemoTelemetrySnapshot() {
 function renderTelemetry(data) {
   if (!data) return;
 
-  const fleet = data.fleet_summary || {};
+  const farm = data.farm_summary || data.fleet_summary || {};
   const nodes = data.nodes || {};
   const queue = data.queue || [];
 
@@ -366,9 +369,9 @@ function renderTelemetry(data) {
   const statPlates = document.getElementById("stat-plates-ejected");
   const statCad = document.getElementById("stat-cad-dispatched");
 
-  if (statActive) statActive.textContent = `${fleet.active_nodes} / ${fleet.total_nodes} ACTIVE`;
-  if (statPlates) statPlates.textContent = fleet.total_plates_ejected || 0;
-  if (statCad) statCad.textContent = fleet.total_cad_dispatched || 0;
+  if (statActive) statActive.textContent = `${farm.active_nodes} / ${farm.total_nodes} ACTIVE`;
+  if (statPlates) statPlates.textContent = farm.total_plates_ejected || 0;
+  if (statCad) statCad.textContent = farm.total_cad_dispatched || 0;
 
   renderPrinterGrid(nodes);
   renderConsumables(nodes);

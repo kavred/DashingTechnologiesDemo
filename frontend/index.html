@@ -18,12 +18,12 @@
         <div class="brand-logo">
           <span class="brand-name">DASING LABS</span>
         </div>
-        <div class="system-tag">AUTOPRINT OS // FLEET CONTROL v1</div>
+        <div class="system-tag">AUTOPRINT OS // FARM CONTROL v1</div>
       </div>
 
       <div class="header-stats">
         <div class="stat-pill">
-          <span class="stat-label">FLEET STATUS</span>
+          <span class="stat-label">FARM STATUS</span>
           <span class="stat-value text-emerald" id="stat-active-nodes">4 / 4 ONLINE</span>
         </div>
         <div class="stat-pill">
@@ -62,7 +62,7 @@
             
             <div class="drop-text-group">
               <h2 class="drop-title">FILE UPLOAD</h2>
-              <p class="drop-subtitle">Drag & Drop CAD file (.3MF, .STL, .STEP) for instant auto-slicing & fleet routing</p>
+              <p class="drop-subtitle">Drag & Drop CAD file (.3MF, .STL, .STEP) for instant auto-slicing & farm routing</p>
             </div>
           </div>
 
@@ -87,11 +87,11 @@
         </div>
       </section>
 
-      <!-- Center & Lower Section: Fleet Telemetry & Sidebar Panels -->
-      <div class="fleet-content-split">
+      <!-- Center & Lower Section: Farm Telemetry & Sidebar Panels -->
+      <div class="farm-content-split">
         
         <!-- Left: 4-Printer Beta Rack Grid -->
-        <section class="fleet-rack-section">
+        <section class="farm-rack-section">
           <div class="section-header">
             <h3 class="section-title">FARM TELEMETRY</h3>
             <div class="rack-badge">LIVE TELEMETRY STREAM</div>
@@ -135,7 +135,7 @@
     <footer class="app-footer">
       <div class="footer-item">OPERATIONAL MODE: <span class="text-emerald">FULLY AUTONOMOUS</span></div>
       <div class="footer-item">SWAPPER MECHANISM: <span class="text-cyan" id="footer-swapper-status">READY</span></div>
-      <div class="footer-item">FLEET ARCHITECTURE: <span class="text-purple">NODE 1 - 4 RACK</span></div>
+      <div class="footer-item">FARM ARCHITECTURE: <span class="text-purple">NODE 1 - 4 RACK</span></div>
     </footer>
   </div>
 
@@ -154,24 +154,24 @@
           <div class="form-group">
             <label for="spool-brand">Brand / Manufacturer</label>
             <select id="spool-brand" class="form-control">
+              <option value="OEM" selected>OEM / Generic</option>
               <option value="Bambu Lab">Bambu Lab</option>
               <option value="PolyMaker">PolyMaker</option>
               <option value="eSUN">eSUN</option>
               <option value="Prusament">Prusament</option>
               <option value="Hatchbox">Hatchbox</option>
               <option value="Sunlu">Sunlu</option>
-              <option value="OEM">OEM / Generic</option>
             </select>
           </div>
 
           <div class="form-group">
             <label for="spool-material">Filament Material</label>
             <select id="spool-material" class="form-control">
-              <option value="PLA+ Tough">PLA+ Tough</option>
-              <option value="PETG Carbon">PETG Carbon</option>
-              <option value="ABS White">ABS White</option>
-              <option value="TPU 95A">TPU 95A</option>
-              <option value="ASA Aero">ASA Aero</option>
+              <option value="PLA">PLA</option>
+              <option value="PETG">PETG</option>
+              <option value="ABS">ABS</option>
+              <option value="ASA">ASA</option>
+              <option value="TPU">TPU</option>
               <option value="PC-CF">PC-CF</option>
             </select>
           </div>
@@ -200,7 +200,7 @@
 
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" onclick="closeRestockModal()">Cancel</button>
-          <button type="submit" class="btn btn-primary">⚡ Load New Spool</button>
+          <button type="submit" class="btn btn-primary">Load New Spool</button>
         </div>
       </form>
     </div>

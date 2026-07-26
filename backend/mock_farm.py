@@ -129,10 +129,10 @@ class PrintFarmManager:
     """
     def __init__(self):
         self.nodes: Dict[str, MockPrinterNode] = {
-            "node-01": MockPrinterNode("node-01", "Node 1", "#10b981", "PLA+ Tough Black"),
-            "node-02": MockPrinterNode("node-02", "Node 2", "#3b82f6", "PETG Carbon"),
-            "node-03": MockPrinterNode("node-03", "Node 3", "#a855f7", "ABS White"),
-            "node-04": MockPrinterNode("node-04", "Node 4", "#f59e0b", "TPU Orange")
+            "node-01": MockPrinterNode("node-01", "Node 1", "#10b981", "PLA"),
+            "node-02": MockPrinterNode("node-02", "Node 2", "#3b82f6", "PETG"),
+            "node-03": MockPrinterNode("node-03", "Node 3", "#a855f7", "ABS"),
+            "node-04": MockPrinterNode("node-04", "Node 4", "#f59e0b", "TPU")
         }
         
         # Single Plate Ejection Queue Lock
@@ -268,19 +268,22 @@ class PrintFarmManager:
         active_nodes_count = sum(1 for n in self.nodes.values() if n.status in ["PREHEATING", "PRINTING", "EJECTING", "WAITING FOR EJECT"])
         total_plates_ejected = sum(n.total_plates_ejected for n in self.nodes.values())
         
+        summary = {
+            "active_nodes": active_nodes_count,
+            "total_nodes": len(self.nodes),
+            "queue_length": len(self.global_queue),
+            "ejection_queue_length": len(self.ejection_queue),
+            "active_ejecting_node": self.active_ejecting_node_id,
+            "total_plates_ejected": total_plates_ejected,
+            "total_processed_today": self.total_processed_today + totalPlatesEjected if 'totalPlatesEjected' in locals() else self.total_processed_today + total_plates_ejected,
+            "total_cad_dispatched": self.total_cad_dispatched,
+            "farm_health_score": 98.4
+        }
+        
         return {
             "timestamp": time.time(),
-            "fleet_summary": {
-                "active_nodes": active_nodes_count,
-                "total_nodes": len(self.nodes),
-                "queue_length": len(self.global_queue),
-                "ejection_queue_length": len(self.ejection_queue),
-                "active_ejecting_node": self.active_ejecting_node_id,
-                "total_plates_ejected": total_plates_ejected,
-                "total_processed_today": self.total_processed_today + total_plates_ejected,
-                "total_cad_dispatched": self.total_cad_dispatched,
-                "farm_health_score": 98.4
-            },
+            "farm_summary": summary,
+            "fleet_summary": summary,
             "nodes": nodes_data,
             "queue": self.global_queue
         }
