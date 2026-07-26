@@ -139,9 +139,29 @@ async def cancel_queue_job(job_id: str):
     return {"status": "success", "queue": farm_manager.global_queue}
 
 # Serve Frontend static files
-frontend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend"))
-app.mount("/static", StaticFiles(directory=frontend_path), name="static")
+root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+frontend_path = os.path.join(root_path, "frontend") if os.path.exists(os.path.join(root_path, "frontend", "index.html")) else root_path
+
+app.mount("/static", StaticFiles(directory=root_path), name="static")
 
 @app.get("/")
 async def read_root():
-    return FileResponse(os.path.join(frontend_path, "index.html"))
+    index_file = os.path.join(root_path, "index.html")
+    if not os.path.exists(index_file):
+        index_file = os.path.join(frontend_path, "index.html")
+    return FileResponse(index_file)
+
+@app.get("/styles.css")
+async def get_styles():
+    css_file = os.path.join(root_path, "styles.css")
+    if not os.path.exists(css_file):
+        css_file = os.path.join(frontend_path, "styles.css")
+    return FileResponse(css_file)
+
+@app.get("/app.js")
+async def get_js():
+    js_file = os.path.join(root_path, "app.js")
+    if not os.path.exists(js_file):
+        js_file = os.path.join(frontend_path, "app.js")
+    return FileResponse(js_file)
+
