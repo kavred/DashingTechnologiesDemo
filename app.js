@@ -9,6 +9,29 @@ let currentTelemetry = null;
 let isDemoSimulatorMode = false;
 let demoSimulatorInterval = null;
 
+const PRESET_CAD_SPECS = {
+  "Turbine_Impeller_V4.3mf": { mass_g: 64.2, total_layers: 310, estimated_duration_s: 35 },
+  "Turbine_Impeller_v3.3mf": { mass_g: 64.2, total_layers: 310, estimated_duration_s: 35 },
+  "Drone_Motor_Chassis.step": { mass_g: 88.5, total_layers: 420, estimated_duration_s: 45 },
+  "Drone_Arm_Mount_Reinforced.stl": { mass_g: 88.5, total_layers: 420, estimated_duration_s: 45 },
+  "Surgical_Guide_Plate.stl": { mass_g: 35.0, total_layers: 180, estimated_duration_s: 30 },
+  "Rocket_Nozzle_Bracket.stl": { mass_g: 52.0, total_layers: 280, estimated_duration_s: 35 },
+  "Cyber_Chassis_Plate.3mf": { mass_g: 110.0, total_layers: 500, estimated_duration_s: 40 },
+  "Aero_Bracket_V2.3mf": { mass_g: 75.0, total_layers: 360, estimated_duration_s: 38 }
+};
+
+function getDeterministicCadSpecs(filename) {
+  if (PRESET_CAD_SPECS[filename]) return PRESET_CAD_SPECS[filename];
+  let h = 0;
+  for (let i = 0; i < filename.length; i++) {
+    h += filename.charCodeAt(i) * (i + 1);
+  }
+  const mass_g = Math.round((25.0 + (h % 950) / 10.0) * 10) / 10;
+  const total_layers = Math.floor(mass_g * 4.0);
+  const estimated_duration_s = 25 + (h % 20);
+  return { mass_g, total_layers, estimated_duration_s };
+}
+
 // Standalone Demo Simulator State (Blank Slate Initial State)
 let demoState = {
   active_ejecting_node: null,
@@ -33,7 +56,7 @@ let demoState = {
       elapsed_time_s: 0,
       estimated_duration_s: 0,
       eject_countdown_s: 0,
-      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "PLA+ Tough Black", color: "#10b981" },
+      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "OEM PLA", color: "#10b981" },
       plates_ejected: 0,
       current_job: null
     },
@@ -54,7 +77,7 @@ let demoState = {
       elapsed_time_s: 0,
       estimated_duration_s: 0,
       eject_countdown_s: 0,
-      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "PETG Carbon", color: "#3b82f6" },
+      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "OEM PETG", color: "#3b82f6" },
       plates_ejected: 0,
       current_job: null
     },
@@ -75,7 +98,7 @@ let demoState = {
       elapsed_time_s: 0,
       estimated_duration_s: 0,
       eject_countdown_s: 0,
-      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "ABS White", color: "#a855f7" },
+      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "OEM ABS", color: "#a855f7" },
       plates_ejected: 0,
       current_job: null
     },
@@ -96,7 +119,7 @@ let demoState = {
       elapsed_time_s: 0,
       estimated_duration_s: 0,
       eject_countdown_s: 0,
-      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "TPU Orange", color: "#f59e0b" },
+      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "OEM TPU", color: "#f59e0b" },
       plates_ejected: 0,
       current_job: null
     }
@@ -368,25 +391,10 @@ function renderTelemetry(data) {
   const statActive = document.getElementById("stat-active-nodes");
   const statPlates = document.getElementById("stat-plates-ejected");
   const statCad = document.getElementById("stat-cad-dispatched");
-  const swapperStatusEl = document.getElementById("footer-swapper-status");
 
   if (statActive) statActive.textContent = `${farm.active_nodes} / ${farm.total_nodes} ACTIVE`;
   if (statPlates) statPlates.textContent = farm.total_plates_ejected || 0;
   if (statCad) statCad.textContent = farm.total_cad_dispatched || 0;
-
-  // Update Footer Swapper Mechanism Status
-  if (swapperStatusEl) {
-    const isSwapperActive = (farm.active_ejecting_node !== null && farm.active_ejecting_node !== undefined) ||
-                            (farm.ejection_queue_length && farm.ejection_queue_length > 0) ||
-                            Object.values(nodes).some(n => n.status === "EJECTING" || n.status === "WAITING FOR EJECT");
-    if (isSwapperActive) {
-      swapperStatusEl.className = "text-amber";
-      swapperStatusEl.textContent = "IN USE";
-    } else {
-      swapperStatusEl.className = "text-cyan";
-      swapperStatusEl.textContent = "READY";
-    }
-  }
 
   renderPrinterGrid(nodes);
   renderConsumables(nodes);
@@ -404,10 +412,10 @@ function renderPrinterGrid(nodes) {
   nodeKeys.forEach((nodeId) => {
     const node = nodes[nodeId];
     const statusClass = node.status.toLowerCase().replace(/\s+/g, '-');
-    const isIdle = node.status === "IDLE";
-    const isPrintActive = ["PRINTING", "PAUSED", "PREHEATING"].includes(node.status);
     const isEjecting = node.status === "EJECTING";
     const isWaitingEject = node.status === "WAITING FOR EJECT";
+    const isIdle = node.status === "IDLE";
+    const isPrintActive = node.status === "PRINTING" || node.status === "PREHEATING" || node.status === "PAUSED";
     const job = node.current_job;
 
     html += `
@@ -471,13 +479,11 @@ function renderPrinterGrid(nodes) {
 
         <!-- Manual Actions -->
         <div class="card-actions">
-          ${isIdle ? `<button class="action-btn eject-btn" onclick="triggerNodeAction('${node.node_id}', 'force_eject')">⏏ Eject plate</button>` : ""}
-          ${isPrintActive ? `
-            <button class="action-btn" onclick="triggerNodeAction('${node.node_id}', '${node.status === 'PAUSED' ? 'resume' : 'pause'}')">
-              ${node.status === 'PAUSED' ? '▶ Resume' : '⏸ Pause'}
-            </button>
-            <button class="action-btn cancel-btn" onclick="triggerNodeAction('${node.node_id}', 'cancel')">⏹ Cancel</button>
-          ` : ""}
+          <button class="action-btn eject-btn" onclick="triggerNodeAction('${node.node_id}', 'force_eject')">Eject plate</button>
+          <button class="action-btn" onclick="triggerNodeAction('${node.node_id}', '${node.status === 'PAUSED' ? 'resume' : 'pause'}')">
+            ${node.status === 'PAUSED' ? '▶ Resume' : '⏸ Pause'}
+          </button>
+          <button class="action-btn" onclick="triggerNodeAction('${node.node_id}', 'cancel')">⏹ Cancel</button>
         </div>
       </div>
     `;
@@ -509,7 +515,7 @@ function renderConsumables(nodes) {
           <div class="spool-bar-fill" style="width: ${spool.pct}%; background-color: ${spool.color}"></div>
         </div>
         <div class="job-meta-footer" style="margin-top: 0.3rem;">
-          <span>SPOOL MATERIAL: <strong style="color: ${spool.color}">${spool.type}</strong></span>
+          <span>SPOOL: <strong style="color: ${spool.color}">${spool.type}</strong></span>
           <a href="#" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600;" onclick="openRestockModal('${node.node_id}'); return false;">+ Restock Spool</a>
         </div>
       </div>
@@ -692,15 +698,14 @@ async function handleCADFileUpload(file) {
 
   if (isDemoSimulatorMode) {
     const ext = file.name.includes(".") ? file.name.split(".").pop().toUpperCase() : "CAD";
-    const mass = Math.round((Math.random() * 80 + 30) * 10) / 10;
-    const layers = Math.floor(mass * 4);
+    const specs = getDeterministicCadSpecs(file.name);
     const newJob = {
       job_id: `JOB-${Math.floor(Math.random() * 9000 + 1000)}`,
       filename: file.name,
       file_type: ext,
-      mass_g: mass,
-      total_layers: layers,
-      estimated_duration_s: Math.floor(Math.random() * 20 + 25),
+      mass_g: specs.mass_g,
+      total_layers: specs.total_layers,
+      estimated_duration_s: specs.estimated_duration_s,
       target_hotend: 225.0,
       target_bed: 60.0,
       priority: "HIGH (AUTO)",

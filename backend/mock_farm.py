@@ -3,6 +3,33 @@ import time
 import random
 from typing import Dict, List, Optional
 
+PRESET_CAD_SPECS = {
+    "Turbine_Impeller_V4.3mf": (64.2, 310, 35),
+    "Turbine_Impeller_v3.3mf": (64.2, 310, 35),
+    "Drone_Motor_Chassis.step": (88.5, 420, 45),
+    "Drone_Arm_Mount_Reinforced.stl": (88.5, 420, 45),
+    "Surgical_Guide_Plate.stl": (35.0, 180, 30),
+    "Rocket_Nozzle_Bracket.stl": (52.0, 280, 35),
+    "Cyber_Chassis_Plate.3mf": (110.0, 500, 40),
+    "Aero_Bracket_V2.3mf": (75.0, 360, 38)
+}
+
+def get_deterministic_cad_specs(filename: str):
+    """
+    Ensures every CAD model uses the EXACT SAME amount of filament (mass in grams),
+    total layers, and duration regardless of which printer node prints it.
+    """
+    if filename in PRESET_CAD_SPECS:
+        return PRESET_CAD_SPECS[filename]
+    
+    # Hash formula for consistent specs based on filename
+    h = sum(ord(c) * (i + 1) for i, c in enumerate(filename))
+    mass_g = round(25.0 + (h % 950) / 10.0, 1) # 25.0g to 120.0g
+    total_layers = int(mass_g * 4.0)
+    estimated_duration = 25 + (h % 20) # 25s to 45s
+    return mass_g, total_layers, estimated_duration
+
+
 class MockPrinterNode:
     """
     Simulates a 3D Printer Node (Node 1, Node 2, Node 3, Node 4)
@@ -36,8 +63,8 @@ class MockPrinterNode:
         # Swapper Ejection Countdown
         self.eject_countdown_s = 0
         
-        # Consumables
-        self.spool_remaining_g = round(random.uniform(680.0, 960.0), 1)
+        # Consumables (Default spools match valid Restock options)
+        self.spool_remaining_g = 1000.0
         self.spool_capacity_g = 1000.0
         self.spool_type = spool_type
         self.spool_color = spool_color
@@ -60,7 +87,6 @@ class MockPrinterNode:
 
     def tick_thermal(self, dt: float = 0.5):
         """Simulates physical thermal dynamics."""
-        # Hotend
         if self.current_hotend_temp < self.target_hotend_temp:
             heating_rate = 8.5 * dt
             self.current_hotend_temp = min(self.target_hotend_temp, self.current_hotend_temp + heating_rate)
@@ -71,7 +97,6 @@ class MockPrinterNode:
         if abs(self.current_hotend_temp - self.target_hotend_temp) < 2.0 and self.target_hotend_temp > 50:
             self.current_hotend_temp += random.uniform(-0.3, 0.3)
             
-        # Bed
         if self.current_bed_temp < self.target_bed_temp:
             bed_heat_rate = 3.0 * dt
             self.current_bed_temp = min(self.target_bed_temp, self.current_bed_temp + bed_heat_rate)
@@ -82,7 +107,6 @@ class MockPrinterNode:
         if abs(self.current_bed_temp - self.target_bed_temp) < 1.5 and self.target_bed_temp > 30:
             self.current_bed_temp += random.uniform(-0.15, 0.15)
             
-        # Chamber
         if self.status in ["PREHEATING", "PRINTING"]:
             self.chamber_temp = min(48.0, self.chamber_temp + 0.1 * dt)
         else:
@@ -128,34 +152,30 @@ class PrintFarmManager:
     global queue, and SINGLE-PLATE-AT-A-TIME robotic ejection queue.
     """
     def __init__(self):
+        # Default initial spools match Restock modal options (OEM PLA, OEM PETG, OEM ABS, OEM TPU)
         self.nodes: Dict[str, MockPrinterNode] = {
-            "node-01": MockPrinterNode("node-01", "Node 1", "#10b981", "PLA"),
-            "node-02": MockPrinterNode("node-02", "Node 2", "#3b82f6", "PETG"),
-            "node-03": MockPrinterNode("node-03", "Node 3", "#a855f7", "ABS"),
-            "node-04": MockPrinterNode("node-04", "Node 4", "#f59e0b", "TPU")
+            "node-01": MockPrinterNode("node-01", "Node 1", "#10b981", "OEM PLA"),
+            "node-02": MockPrinterNode("node-02", "Node 2", "#3b82f6", "OEM PETG"),
+            "node-03": MockPrinterNode("node-03", "Node 3", "#a855f7", "OEM ABS"),
+            "node-04": MockPrinterNode("node-04", "Node 4", "#f59e0b", "OEM TPU")
         }
         
         # Single Plate Ejection Queue Lock
         self.active_ejecting_node_id: Optional[str] = None
-        self.ejection_queue: List[str] = [] # List of node_ids waiting to eject
+        self.ejection_queue: List[str] = []
         
-        # Global Print Jobs Queue - Starts Empty for Blank Slate
+        # Global Print Jobs Queue
         self.global_queue: List[dict] = []
         
         self.total_processed_today = 0
         self.total_cad_dispatched = 0
 
     def request_ejection(self, node_id: str):
-        """
-        Ensures ONLY ONE plate is ejected at a time across the entire farm!
-        If another plate is ejecting, queues the node up to wait its turn.
-        """
         node = self.nodes.get(node_id)
         if not node:
             return
 
         if self.active_ejecting_node_id is None:
-            # Grant ejection lock immediately!
             self.active_ejecting_node_id = node_id
             node.status = "EJECTING"
             node.eject_countdown_s = 5
@@ -164,7 +184,6 @@ class PrintFarmManager:
             node.fan_rpm = 800
             node.extruding_rate = 0.0
         else:
-            # Another node is currently ejecting! Queue this node.
             if node_id != self.active_ejecting_node_id and node_id not in self.ejection_queue:
                 self.ejection_queue.append(node_id)
                 node.status = "WAITING FOR EJECT"
@@ -173,7 +192,6 @@ class PrintFarmManager:
                 node.extruding_rate = 0.0
 
     def tick(self, dt: float = 0.5):
-        """Ticks physical simulation and manages the single-ejector queue."""
         for node in self.nodes.values():
             node.tick_thermal(dt)
 
@@ -199,7 +217,6 @@ class PrintFarmManager:
                 node.fan_rpm = random.randint(5200, 6400)
                 node.extruding_rate = round(random.uniform(14.0, 22.0), 1)
                 
-                # Print complete -> Request plate ejection!
                 if node.progress >= 100.0:
                     self.request_ejection(node.node_id)
 
@@ -207,7 +224,6 @@ class PrintFarmManager:
                 node.eject_countdown_s -= dt
                 node.fan_rpm = 2000
                 if node.eject_countdown_s <= 0:
-                    # Ejection finished! Release lock and check queue
                     node.total_plates_ejected += 1
                     node.status = "IDLE"
                     node.current_job = None
@@ -217,10 +233,8 @@ class PrintFarmManager:
                     node.eject_countdown_s = 0
                     node.fan_rpm = 0
                     
-                    # Release active lock
                     self.active_ejecting_node_id = None
                     
-                    # Promote next waiting node in ejection queue
                     if self.ejection_queue:
                         next_node_id = self.ejection_queue.pop(0)
                         self.request_ejection(next_node_id)
@@ -231,23 +245,20 @@ class PrintFarmManager:
                 node.fan_rpm = 0
                 node.extruding_rate = 0.0
                 
-                # Auto-assign next job from global print queue
                 if len(self.global_queue) > 0:
                     next_job = self.global_queue.pop(0)
                     node.assign_job(next_job)
 
     def add_cad_file(self, filename: str, file_size_kb: float) -> dict:
         ext = filename.split(".")[-1].upper() if "." in filename else "CAD"
-        estimated_mass = round(random.uniform(25.0, 120.0), 1)
-        estimated_duration = random.randint(25, 45)
-        total_layers = int(estimated_mass * 4.0)
+        mass_g, total_layers, estimated_duration = get_deterministic_cad_specs(filename)
 
         job_id = f"JOB-{random.randint(9045, 9999)}"
         new_job = {
             "job_id": job_id,
             "filename": filename,
             "file_type": ext,
-            "mass_g": estimated_mass,
+            "mass_g": mass_g,
             "total_layers": total_layers,
             "estimated_duration_s": estimated_duration,
             "target_hotend": 225.0,
@@ -275,7 +286,7 @@ class PrintFarmManager:
             "ejection_queue_length": len(self.ejection_queue),
             "active_ejecting_node": self.active_ejecting_node_id,
             "total_plates_ejected": total_plates_ejected,
-            "total_processed_today": self.total_processed_today + totalPlatesEjected if 'totalPlatesEjected' in locals() else self.total_processed_today + total_plates_ejected,
+            "total_processed_today": self.total_processed_today + total_plates_ejected,
             "total_cad_dispatched": self.total_cad_dispatched,
             "farm_health_score": 98.4
         }

@@ -526,6 +526,7 @@ body {
   font-family: var(--font-mono);
   font-size: 0.65rem;
   color: var(--text-dim);
+
 }
 
 .temp-readout {
@@ -662,7 +663,7 @@ body {
   color: var(--accent-purple);
   background: rgba(168, 85, 247, 0.12);
   border: 1px solid rgba(168, 85, 247, 0.3);
-  padding: 0.25rem 0.5rem;
+  padding: 0.2rem 0.5rem;
   border-radius: var(--radius-sm);
 }
 
