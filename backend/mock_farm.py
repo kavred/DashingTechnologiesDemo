@@ -4,10 +4,13 @@ import random
 from typing import Dict, List, Optional
 
 PRESET_CAD_SPECS = {
+    "Turbine_Impeller.3mf": (64.2, 310, 35),
     "Turbine_Impeller_V4.3mf": (64.2, 310, 35),
     "Turbine_Impeller_v3.3mf": (64.2, 310, 35),
+    "Drone_Chassis.step": (88.5, 420, 45),
     "Drone_Motor_Chassis.step": (88.5, 420, 45),
     "Drone_Arm_Mount_Reinforced.stl": (88.5, 420, 45),
+    "Surgical_Guide.stl": (35.0, 180, 30),
     "Surgical_Guide_Plate.stl": (35.0, 180, 30),
     "Rocket_Nozzle_Bracket.stl": (52.0, 280, 35),
     "Cyber_Chassis_Plate.3mf": (110.0, 500, 40),

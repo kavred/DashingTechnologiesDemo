@@ -10,10 +10,13 @@ let isDemoSimulatorMode = false;
 let demoSimulatorInterval = null;
 
 const PRESET_CAD_SPECS = {
+  "Turbine_Impeller.3mf": { mass_g: 64.2, total_layers: 310, estimated_duration_s: 35 },
   "Turbine_Impeller_V4.3mf": { mass_g: 64.2, total_layers: 310, estimated_duration_s: 35 },
   "Turbine_Impeller_v3.3mf": { mass_g: 64.2, total_layers: 310, estimated_duration_s: 35 },
+  "Drone_Chassis.step": { mass_g: 88.5, total_layers: 420, estimated_duration_s: 45 },
   "Drone_Motor_Chassis.step": { mass_g: 88.5, total_layers: 420, estimated_duration_s: 45 },
   "Drone_Arm_Mount_Reinforced.stl": { mass_g: 88.5, total_layers: 420, estimated_duration_s: 45 },
+  "Surgical_Guide.stl": { mass_g: 35.0, total_layers: 180, estimated_duration_s: 30 },
   "Surgical_Guide_Plate.stl": { mass_g: 35.0, total_layers: 180, estimated_duration_s: 30 },
   "Rocket_Nozzle_Bracket.stl": { mass_g: 52.0, total_layers: 280, estimated_duration_s: 35 },
   "Cyber_Chassis_Plate.3mf": { mass_g: 110.0, total_layers: 500, estimated_duration_s: 40 },
