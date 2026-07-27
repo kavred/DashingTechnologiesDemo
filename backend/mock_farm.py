@@ -191,6 +191,48 @@ class PrintFarmManager:
                 node.target_bed_temp = 0.0
                 node.extruding_rate = 0.0
 
+    def cancel_job(self, node_id: str):
+        """
+        Cancels an active print job.
+        Since print material is on the bed, ejection is automatically requested
+        so the robotic arm clears the canceled plate!
+        """
+        node = self.nodes.get(node_id)
+        if not node:
+            return
+        if node.status in ["PRINTING", "PREHEATING", "PAUSED"] or node.current_job is not None:
+            self.request_ejection(node_id)
+        elif node.status not in ["EJECTING", "WAITING FOR EJECT"]:
+            node.status = "IDLE"
+            node.current_job = None
+            node.progress = 0.0
+
+    def pause_job(self, node_id: str):
+        """
+        Pauses an active print job.
+        Holds execution: temperatures maintain target setpoints, progress holds.
+        """
+        node = self.nodes.get(node_id)
+        if not node:
+            return
+        if node.status in ["PRINTING", "PREHEATING"]:
+            node.status = "PAUSED"
+            node.extruding_rate = 0.0
+            node.fan_rpm = 1500
+
+    def resume_job(self, node_id: str):
+        """Resumes a paused print job."""
+        node = self.nodes.get(node_id)
+        if not node:
+            return
+        if node.status == "PAUSED":
+            hotend_ready = (node.target_hotend_temp - node.current_hotend_temp) <= 2.0
+            bed_ready = (node.target_bed_temp - node.current_bed_temp) <= 2.0
+            if hotend_ready and bed_ready:
+                node.status = "PRINTING"
+            else:
+                node.status = "PREHEATING"
+
     def tick(self, dt: float = 0.5):
         for node in self.nodes.values():
             node.tick_thermal(dt)
@@ -219,6 +261,10 @@ class PrintFarmManager:
                 
                 if node.progress >= 100.0:
                     self.request_ejection(node.node_id)
+
+            elif node.status == "PAUSED":
+                node.extruding_rate = 0.0
+                node.fan_rpm = 1500
 
             elif node.status == "EJECTING":
                 node.eject_countdown_s -= dt
@@ -250,13 +296,14 @@ class PrintFarmManager:
                     node.assign_job(next_job)
 
     def add_cad_file(self, filename: str, file_size_kb: float) -> dict:
-        ext = filename.split(".")[-1].upper() if "." in filename else "CAD"
+        ext = "GCODE"
+        gcode_filename = filename.rsplit(".", 1)[0] + ".gcode" if "." in filename else f"{filename}.gcode"
         mass_g, total_layers, estimated_duration = get_deterministic_cad_specs(filename)
 
         job_id = f"JOB-{random.randint(9045, 9999)}"
         new_job = {
             "job_id": job_id,
-            "filename": filename,
+            "filename": gcode_filename,
             "file_type": ext,
             "mass_g": mass_g,
             "total_layers": total_layers,

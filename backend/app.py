@@ -127,15 +127,11 @@ async def printer_action(
     if action == "force_eject":
         farm_manager.request_ejection(node_id)
     elif action == "pause":
-        if node.status == "PRINTING":
-            node.status = "PAUSED"
+        farm_manager.pause_job(node_id)
     elif action == "resume":
-        if node.status == "PAUSED":
-            node.status = "PRINTING"
+        farm_manager.resume_job(node_id)
     elif action == "cancel":
-        node.status = "IDLE"
-        node.current_job = None
-        node.progress = 0.0
+        farm_manager.cancel_job(node_id)
     elif action == "restock_spool":
         spool_weight = weight if weight else 1000.0
         node.spool_remaining_g = spool_weight

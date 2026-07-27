@@ -127,9 +127,35 @@ let demoState = {
   queue: []
 };
 
+// Disclaimer Modal Helper Functions
+function openDisclaimerModal() {
+  const modal = document.getElementById("disclaimer-modal");
+  if (modal) modal.classList.remove("hidden");
+}
+
+function closeDisclaimerModal() {
+  const modal = document.getElementById("disclaimer-modal");
+  if (modal) modal.classList.add("hidden");
+  try {
+    localStorage.setItem("dasing_demo_disclaimer_seen", "true");
+  } catch (e) {}
+}
+
+function checkFirstVisitDisclaimer() {
+  try {
+    const hasSeenDisclaimer = localStorage.getItem("dasing_demo_disclaimer_seen");
+    if (!hasSeenDisclaimer) {
+      openDisclaimerModal();
+    }
+  } catch (e) {
+    openDisclaimerModal();
+  }
+}
+
 // Initialize App on DOM Loaded
 document.addEventListener("DOMContentLoaded", () => {
   initDragAndDrop();
+  checkFirstVisitDisclaimer();
 
   // Render initial telemetry snapshot instantly on page load (0ms delay!)
   const initialTelemetry = getDemoTelemetrySnapshot();
@@ -479,11 +505,13 @@ function renderPrinterGrid(nodes) {
 
         <!-- Manual Actions -->
         <div class="card-actions">
-          <button class="action-btn eject-btn" onclick="triggerNodeAction('${node.node_id}', 'force_eject')">Eject plate</button>
-          <button class="action-btn" onclick="triggerNodeAction('${node.node_id}', '${node.status === 'PAUSED' ? 'resume' : 'pause'}')">
-            ${node.status === 'PAUSED' ? '▶ Resume' : '⏸ Pause'}
-          </button>
-          <button class="action-btn" onclick="triggerNodeAction('${node.node_id}', 'cancel')">⏹ Cancel</button>
+          ${isIdle ? `<button class="action-btn eject-btn" onclick="triggerNodeAction('${node.node_id}', 'force_eject')">Eject plate</button>` : ""}
+          ${isPrintActive ? `
+            <button class="action-btn" onclick="triggerNodeAction('${node.node_id}', '${node.status === 'PAUSED' ? 'resume' : 'pause'}')">
+              ${node.status === 'PAUSED' ? '▶ Resume' : '⏸ Pause'}
+            </button>
+            <button class="action-btn cancel-btn" onclick="triggerNodeAction('${node.node_id}', 'cancel')">⏹ Cancel</button>
+          ` : ""}
         </div>
       </div>
     `;
@@ -697,12 +725,12 @@ async function handleCADFileUpload(file) {
   setStepActive(4);
 
   if (isDemoSimulatorMode) {
-    const ext = file.name.includes(".") ? file.name.split(".").pop().toUpperCase() : "CAD";
+    const gcodeFilename = file.name.includes(".") ? file.name.substring(0, file.name.lastIndexOf(".")) + ".gcode" : file.name + ".gcode";
     const specs = getDeterministicCadSpecs(file.name);
     const newJob = {
       job_id: `JOB-${Math.floor(Math.random() * 9000 + 1000)}`,
-      filename: file.name,
-      file_type: ext,
+      filename: gcodeFilename,
+      file_type: "GCODE",
       mass_g: specs.mass_g,
       total_layers: specs.total_layers,
       estimated_duration_s: specs.estimated_duration_s,
@@ -778,13 +806,23 @@ async function triggerNodeAction(nodeId, action) {
     if (action === "force_eject") {
       requestDemoEjection(nodeId);
     } else if (action === "pause") {
-      if (node.status === "PRINTING") node.status = "PAUSED";
+      if (node.status === "PRINTING" || node.status === "PREHEATING") {
+        node.status = "PAUSED";
+        node.extruding_rate = 0.0;
+        node.fan_rpm = 1500;
+      }
     } else if (action === "resume") {
-      if (node.status === "PAUSED") node.status = "PRINTING";
+      if (node.status === "PAUSED") {
+        node.status = "PRINTING";
+      }
     } else if (action === "cancel") {
-      node.status = "IDLE";
-      node.current_job = null;
-      node.progress = 0.0;
+      if (node.status === "PRINTING" || node.status === "PREHEATING" || node.status === "PAUSED" || node.current_job) {
+        requestDemoEjection(nodeId);
+      } else if (node.status !== "EJECTING" && node.status !== "WAITING FOR EJECT") {
+        node.status = "IDLE";
+        node.current_job = null;
+        node.progress = 0.0;
+      }
     } else if (action === "restock_spool") {
       node.spool.remaining_g = 1000.0;
       node.spool.pct = 100.0;
