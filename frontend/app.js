@@ -1,5 +1,5 @@
 /**
- * DASING LABS // AUTOPRINT OS FRONTEND ENGINE
+ * DASHING TECHNOLOGIES // AUTOPRINT OS FRONTEND ENGINE
  * WebSocket Telemetry Manager & Standalone GitHub Pages Client Simulator Engine
  */
 
@@ -140,13 +140,13 @@ function closeDisclaimerModal() {
   const modal = document.getElementById("disclaimer-modal");
   if (modal) modal.classList.add("hidden");
   try {
-    localStorage.setItem("dasing_demo_disclaimer_seen", "true");
+    localStorage.setItem("dashing_demo_disclaimer_seen", "true");
   } catch (e) {}
 }
 
 function checkFirstVisitDisclaimer() {
   try {
-    const hasSeenDisclaimer = localStorage.getItem("dasing_demo_disclaimer_seen");
+    const hasSeenDisclaimer = localStorage.getItem("dashing_demo_disclaimer_seen");
     if (!hasSeenDisclaimer) {
       openDisclaimerModal();
     }
