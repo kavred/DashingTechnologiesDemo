@@ -422,21 +422,49 @@ function renderTelemetry(data) {
   if (statPlates) statPlates.textContent = farm.total_plates_ejected || 0;
   if (statCad) statCad.textContent = farm.total_cad_dispatched || 0;
 
+  const footerSwapper = document.getElementById("footer-swapper-status");
+  const isSwapperInUse = Boolean(
+    farm.active_ejecting_node ||
+    (farm.ejection_queue_length && farm.ejection_queue_length > 0) ||
+    Object.values(nodes).some((n) => n.status === "EJECTING" || n.status === "WAITING FOR EJECT")
+  );
+
+  if (footerSwapper) {
+    if (isSwapperInUse) {
+      footerSwapper.textContent = "IN USE";
+      footerSwapper.className = "text-amber";
+    } else {
+      footerSwapper.textContent = "READY";
+      footerSwapper.className = "text-cyan";
+    }
+  }
+
   renderPrinterGrid(nodes);
   renderConsumables(nodes);
   renderQueue(queue);
 }
 
 // Render Printer Nodes (Node 1, Node 2, Node 3, Node 4)
+// Uses in-place DOM updates to prevent hover-state flicker caused by innerHTML replacement.
 function renderPrinterGrid(nodes) {
   const gridContainer = document.getElementById("printer-grid");
   if (!gridContainer) return;
 
   const nodeKeys = Object.keys(nodes).sort();
-  let html = "";
+
+  // Build a set of expected card IDs so we can remove stale ones
+  const expectedIds = new Set(nodeKeys.map((id) => `card-${id}`));
+
+  // Remove cards that no longer exist in telemetry
+  Array.from(gridContainer.children).forEach((child) => {
+    if (!expectedIds.has(child.id)) child.remove();
+  });
 
   nodeKeys.forEach((nodeId) => {
     const node = nodes[nodeId];
+    const cardId = `card-${node.node_id}`;
+    let card = document.getElementById(cardId);
+
     const statusClass = node.status.toLowerCase().replace(/\s+/g, '-');
     const isEjecting = node.status === "EJECTING";
     const isWaitingEject = node.status === "WAITING FOR EJECT";
@@ -444,94 +472,210 @@ function renderPrinterGrid(nodes) {
     const isPrintActive = node.status === "PRINTING" || node.status === "PREHEATING" || node.status === "PAUSED";
     const job = node.current_job;
 
-    html += `
-      <div class="printer-card" id="card-${node.node_id}">
-        <div class="printer-card-header">
-          <div class="node-identity">
-            <span class="node-name">${node.name}</span>
-          </div>
-          <span class="status-badge ${statusClass}">${node.status}</span>
-        </div>
+    // If card doesn't exist yet, create it from scratch once
+    if (!card) {
+      card = document.createElement("div");
+      card.className = "printer-card";
+      card.id = cardId;
+      card.innerHTML = _buildPrinterCardInner(node, statusClass, isEjecting, isWaitingEject, isIdle, isPrintActive, job);
+      gridContainer.appendChild(card);
+      return;
+    }
 
-        ${isEjecting ? `
-          <div class="swapper-banner">
-            <span>EJECTING PLATE... SWAPPER MECHANISM ACTIVE</span>
-            <strong>${node.eject_countdown_s}s</strong>
-          </div>
-        ` : ""}
+    // --- In-place updates for an existing card (no innerHTML nuke) ---
 
-        ${isWaitingEject ? `
-          <div class="swapper-banner waiting-banner">
-            <span>WAITING FOR EJECTOR (QUEUED IN LINE)</span>
-            <strong>WAITING...</strong>
-          </div>
-        ` : ""}
+    // Status badge
+    const badge = card.querySelector(".status-badge");
+    if (badge) {
+      badge.className = `status-badge ${statusClass}`;
+      badge.textContent = node.status;
+    }
 
-        <!-- Telemetry Gauges -->
-        <div class="telemetry-row">
-          <div class="temp-box">
-            <div class="temp-header">
-              <span>HOTEND TEMP</span>
-              <span>T: ${node.target_hotend_temp}°C</span>
-            </div>
-            <div class="temp-readout hotend-color">${node.current_hotend_temp}°C</div>
-          </div>
-          <div class="temp-box">
-            <div class="temp-header">
-              <span>BED TEMP</span>
-              <span>T: ${node.target_bed_temp}°C</span>
-            </div>
-            <div class="temp-readout bed-color">${node.current_bed_temp}°C</div>
-          </div>
-        </div>
+    // Swapper / Waiting banner (structural change — only update when status category changes)
+    const existingBanner = card.querySelector(".swapper-banner");
+    if (isEjecting) {
+      if (!existingBanner || existingBanner.classList.contains("waiting-banner")) {
+        if (existingBanner) existingBanner.remove();
+        const banner = document.createElement("div");
+        banner.className = "swapper-banner";
+        banner.innerHTML = `<span>EJECTING PLATE... SWAPPER MECHANISM ACTIVE</span><strong data-role="eject-countdown">${node.eject_countdown_s}s</strong>`;
+        const header = card.querySelector(".printer-card-header");
+        if (header) header.after(banner);
+      } else {
+        const cd = existingBanner.querySelector("[data-role='eject-countdown']") || existingBanner.querySelector("strong");
+        if (cd) cd.textContent = `${node.eject_countdown_s}s`;
+      }
+    } else if (isWaitingEject) {
+      if (!existingBanner || !existingBanner.classList.contains("waiting-banner")) {
+        if (existingBanner) existingBanner.remove();
+        const banner = document.createElement("div");
+        banner.className = "swapper-banner waiting-banner";
+        banner.innerHTML = `<span>WAITING FOR EJECTOR (QUEUED IN LINE)</span><strong>WAITING...</strong>`;
+        const header = card.querySelector(".printer-card-header");
+        if (header) header.after(banner);
+      }
+    } else {
+      if (existingBanner) existingBanner.remove();
+    }
 
-        <!-- Print Progress -->
-        <div class="job-progress-container">
-          <div class="job-info-row">
-            <span class="job-filename">${job ? job.filename : "No active job"}</span>
-            <span class="layer-counter">${node.status === 'PRINTING' ? `Layer ${node.current_layer} / ${node.total_layers}` : "--"}</span>
-          </div>
-          
-          <div class="progress-track">
-            <div class="progress-fill" style="width: ${node.progress}%"></div>
-          </div>
+    // Telemetry gauges — update text only
+    const tempReadouts = card.querySelectorAll(".temp-readout");
+    if (tempReadouts[0]) tempReadouts[0].textContent = `${node.current_hotend_temp}°C`;
+    if (tempReadouts[1]) tempReadouts[1].textContent = `${node.current_bed_temp}°C`;
 
-          <div class="job-meta-footer">
-            <span>PROGRESS: <strong>${node.progress}%</strong></span>
-            <span>FAN: ${node.fan_rpm} RPM</span>
-            <span>RATE: ${node.extruding_rate} mm³/s</span>
-          </div>
-        </div>
+    const tempHeaders = card.querySelectorAll(".temp-header");
+    if (tempHeaders[0]) {
+      const spans = tempHeaders[0].querySelectorAll("span");
+      if (spans[1]) spans[1].textContent = `T: ${node.target_hotend_temp}°C`;
+    }
+    if (tempHeaders[1]) {
+      const spans = tempHeaders[1].querySelectorAll("span");
+      if (spans[1]) spans[1].textContent = `T: ${node.target_bed_temp}°C`;
+    }
 
-        <!-- Manual Actions -->
-        <div class="card-actions">
-          ${isIdle ? `<button class="action-btn eject-btn" onclick="triggerNodeAction('${node.node_id}', 'force_eject')">Eject plate</button>` : ""}
-          ${isPrintActive ? `
+    // Job filename & layer counter
+    const jobFilename = card.querySelector(".job-filename");
+    if (jobFilename) jobFilename.textContent = job ? job.filename : "No active job";
+    const layerCounter = card.querySelector(".layer-counter");
+    if (layerCounter) layerCounter.textContent = node.status === 'PRINTING' ? `Layer ${node.current_layer} / ${node.total_layers}` : "--";
+
+    // Progress bar
+    const progressFill = card.querySelector(".progress-fill");
+    if (progressFill) progressFill.style.width = `${node.progress}%`;
+
+    // Job meta footer
+    const metaFooter = card.querySelector(".job-meta-footer");
+    if (metaFooter) {
+      const spans = metaFooter.querySelectorAll("span");
+      if (spans[0]) spans[0].innerHTML = `PROGRESS: <strong>${node.progress}%</strong>`;
+      if (spans[1]) spans[1].textContent = `FAN: ${node.fan_rpm} RPM`;
+      if (spans[2]) spans[2].textContent = `RATE: ${node.extruding_rate} mm³/s`;
+    }
+
+    // Action buttons — only rebuild when the logical state category changes
+    const actionsContainer = card.querySelector(".card-actions");
+    if (actionsContainer) {
+      const prevState = actionsContainer.dataset.state || "";
+      let newState = "none";
+      if (isIdle) newState = "idle";
+      else if (isPrintActive) newState = `active-${node.status}`;
+
+      if (prevState !== newState) {
+        actionsContainer.dataset.state = newState;
+        let actionsHtml = "";
+        if (isIdle) {
+          actionsHtml = `<button class="action-btn eject-btn" onclick="triggerNodeAction('${node.node_id}', 'force_eject')">Eject plate</button>`;
+        } else if (isPrintActive) {
+          actionsHtml = `
             <button class="action-btn" onclick="triggerNodeAction('${node.node_id}', '${node.status === 'PAUSED' ? 'resume' : 'pause'}')">
               ${node.status === 'PAUSED' ? '▶ Resume' : '⏸ Pause'}
             </button>
-            <button class="action-btn cancel-btn" onclick="triggerNodeAction('${node.node_id}', 'cancel')">⏹ Cancel</button>
-          ` : ""}
-        </div>
-      </div>
-    `;
+            <button class="action-btn cancel-btn" onclick="triggerNodeAction('${node.node_id}', 'cancel')">⏹ Cancel</button>`;
+        }
+        actionsContainer.innerHTML = actionsHtml;
+      }
+    }
   });
+}
 
-  gridContainer.innerHTML = html;
+// Helper: build the full inner HTML for a new printer card (used only on first creation)
+function _buildPrinterCardInner(node, statusClass, isEjecting, isWaitingEject, isIdle, isPrintActive, job) {
+  return `
+    <div class="printer-card-header">
+      <div class="node-identity">
+        <span class="node-name">${node.name}</span>
+      </div>
+      <span class="status-badge ${statusClass}">${node.status}</span>
+    </div>
+
+    ${isEjecting ? `
+      <div class="swapper-banner">
+        <span>EJECTING PLATE... SWAPPER MECHANISM ACTIVE</span>
+        <strong data-role="eject-countdown">${node.eject_countdown_s}s</strong>
+      </div>
+    ` : ""}
+
+    ${isWaitingEject ? `
+      <div class="swapper-banner waiting-banner">
+        <span>WAITING FOR EJECTOR (QUEUED IN LINE)</span>
+        <strong>WAITING...</strong>
+      </div>
+    ` : ""}
+
+    <!-- Telemetry Gauges -->
+    <div class="telemetry-row">
+      <div class="temp-box">
+        <div class="temp-header">
+          <span>HOTEND TEMP</span>
+          <span>T: ${node.target_hotend_temp}°C</span>
+        </div>
+        <div class="temp-readout hotend-color">${node.current_hotend_temp}°C</div>
+      </div>
+      <div class="temp-box">
+        <div class="temp-header">
+          <span>BED TEMP</span>
+          <span>T: ${node.target_bed_temp}°C</span>
+        </div>
+        <div class="temp-readout bed-color">${node.current_bed_temp}°C</div>
+      </div>
+    </div>
+
+    <!-- Print Progress -->
+    <div class="job-progress-container">
+      <div class="job-info-row">
+        <span class="job-filename">${job ? job.filename : "No active job"}</span>
+        <span class="layer-counter">${node.status === 'PRINTING' ? `Layer ${node.current_layer} / ${node.total_layers}` : "--"}</span>
+      </div>
+
+      <div class="progress-track">
+        <div class="progress-fill" style="width: ${node.progress}%"></div>
+      </div>
+
+      <div class="job-meta-footer">
+        <span>PROGRESS: <strong>${node.progress}%</strong></span>
+        <span>FAN: ${node.fan_rpm} RPM</span>
+        <span>RATE: ${node.extruding_rate} mm³/s</span>
+      </div>
+    </div>
+
+    <!-- Manual Actions -->
+    <div class="card-actions" data-state="${isIdle ? 'idle' : isPrintActive ? `active-${node.status}` : 'none'}">
+      ${isIdle ? `<button class="action-btn eject-btn" onclick="triggerNodeAction('${node.node_id}', 'force_eject')">Eject plate</button>` : ""}
+      ${isPrintActive ? `
+        <button class="action-btn" onclick="triggerNodeAction('${node.node_id}', '${node.status === 'PAUSED' ? 'resume' : 'pause'}')">
+          ${node.status === 'PAUSED' ? '▶ Resume' : '⏸ Pause'}
+        </button>
+        <button class="action-btn cancel-btn" onclick="triggerNodeAction('${node.node_id}', 'cancel')">⏹ Cancel</button>
+      ` : ""}
+    </div>
+  `;
 }
 
 // Render Consumables & Spool Tracking
+// Uses in-place DOM updates to prevent hover-state flicker.
 function renderConsumables(nodes) {
   const container = document.getElementById("consumables-list");
   if (!container) return;
 
-  let html = "";
-  Object.keys(nodes).sort().forEach((nodeId) => {
+  const nodeKeys = Object.keys(nodes).sort();
+  const expectedIds = new Set(nodeKeys.map((id) => `consumable-${id}`));
+
+  // Remove stale consumable items
+  Array.from(container.children).forEach((child) => {
+    if (!expectedIds.has(child.id)) child.remove();
+  });
+
+  nodeKeys.forEach((nodeId) => {
     const node = nodes[nodeId];
     const spool = node.spool || {};
+    const itemId = `consumable-${nodeId}`;
+    let item = document.getElementById(itemId);
 
-    html += `
-      <div class="consumable-item">
+    if (!item) {
+      item = document.createElement("div");
+      item.className = "consumable-item";
+      item.id = itemId;
+      item.innerHTML = `
         <div class="consumable-header">
           <span class="spool-name">
             <span class="spool-dot" style="background-color: ${spool.color}"></span>
@@ -546,14 +690,34 @@ function renderConsumables(nodes) {
           <span>SPOOL: <strong style="color: ${spool.color}">${spool.type}</strong></span>
           <a href="#" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600;" onclick="openRestockModal('${node.node_id}'); return false;">+ Restock Spool</a>
         </div>
-      </div>
-    `;
-  });
+      `;
+      container.appendChild(item);
+      return;
+    }
 
-  container.innerHTML = html;
+    // In-place updates
+    const spoolVal = item.querySelector(".spool-val");
+    if (spoolVal) spoolVal.textContent = `${spool.remaining_g}g / ${spool.capacity_g}g (${spool.pct}%)`;
+
+    const barFill = item.querySelector(".spool-bar-fill");
+    if (barFill) {
+      barFill.style.width = `${spool.pct}%`;
+      barFill.style.backgroundColor = spool.color;
+    }
+
+    const spoolDot = item.querySelector(".spool-dot");
+    if (spoolDot) spoolDot.style.backgroundColor = spool.color;
+
+    const spoolTypeStrong = item.querySelector(".job-meta-footer strong");
+    if (spoolTypeStrong) {
+      spoolTypeStrong.textContent = spool.type;
+      spoolTypeStrong.style.color = spool.color;
+    }
+  });
 }
 
 // Render Global Queue
+// Uses in-place DOM updates to prevent hover-state flicker.
 function renderQueue(queue) {
   const container = document.getElementById("queue-list");
   const countBadge = document.getElementById("queue-count-badge");
@@ -562,14 +726,33 @@ function renderQueue(queue) {
   if (countBadge) countBadge.textContent = `${queue.length} Pending`;
 
   if (queue.length === 0) {
-    container.innerHTML = `<div class="empty-queue-msg">Queue empty. Drop CAD files above to populate.</div>`;
+    if (!container.querySelector(".empty-queue-msg")) {
+      container.innerHTML = `<div class="empty-queue-msg">Queue empty. Drop CAD files above to populate.</div>`;
+    }
     return;
   }
 
-  let html = "";
+  // Remove empty-queue message if present
+  const emptyMsg = container.querySelector(".empty-queue-msg");
+  if (emptyMsg) emptyMsg.remove();
+
+  // Build set of expected queue item IDs
+  const expectedIds = new Set(queue.map((job) => `queue-${job.job_id}`));
+
+  // Remove stale queue items
+  Array.from(container.children).forEach((child) => {
+    if (!expectedIds.has(child.id)) child.remove();
+  });
+
   queue.forEach((job) => {
-    html += `
-      <div class="queue-item">
+    const itemId = `queue-${job.job_id}`;
+    let item = document.getElementById(itemId);
+
+    if (!item) {
+      item = document.createElement("div");
+      item.className = "queue-item";
+      item.id = itemId;
+      item.innerHTML = `
         <div class="queue-item-info">
           <span class="queue-filename">${job.filename}</span>
           <span class="queue-meta">
@@ -577,11 +760,17 @@ function renderQueue(queue) {
           </span>
         </div>
         <button class="queue-cancel-btn" onclick="cancelQueueJob('${job.job_id}')" title="Cancel Job">✕</button>
-      </div>
-    `;
-  });
+      `;
+      container.appendChild(item);
+      return;
+    }
 
-  container.innerHTML = html;
+    // In-place updates for queue metadata
+    const metaSpan = item.querySelector(".queue-meta");
+    if (metaSpan) {
+      metaSpan.textContent = `${job.file_type} • ${job.mass_g}g • ${job.total_layers} layers • ${job.auto_routed_node || 'Auto-Routed'}`;
+    }
+  });
 }
 
 // --------------------------------------------------------------------------
