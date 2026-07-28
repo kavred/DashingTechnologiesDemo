@@ -94,13 +94,14 @@ async def websocket_endpoint(websocket: WebSocket):
 async def get_telemetry():
     return farm_manager.get_telemetry()
 
+@app.post("/api/upload-gcode")
 @app.post("/api/upload-cad")
-async def upload_cad(file: UploadFile = File(...)):
-    filename = file.filename if file.filename else "Uploaded_Part.stl"
+async def upload_gcode(file: UploadFile = File(...)):
+    filename = file.filename if file.filename else "Uploaded_Part.gcode"
     content = await file.read()
     file_size_kb = len(content) / 1024.0
-    job = farm_manager.add_cad_file(filename, file_size_kb)
-    return {"status": "success", "job": job, "message": "Zero-Touch parsing and auto-routing complete."}
+    job = farm_manager.add_gcode_file(filename, file_size_kb)
+    return {"status": "success", "job": job, "message": "G-Code parsing and auto-routing complete."}
 
 class DemoCADRequest(BaseModel):
     filename: str

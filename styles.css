@@ -166,6 +166,66 @@ body {
   100% { transform: scale(0.9); opacity: 0.7; }
 }
 
+/* Responsive Header Layout for Half Screen & Tight Viewports */
+@media (max-width: 1200px) {
+  .app-header {
+    height: auto;
+    min-height: var(--header-height);
+    padding: 0.5rem clamp(0.8rem, 1.5vw, 1.5rem);
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    justify-content: space-between;
+  }
+
+  .header-stats {
+    gap: 0.5rem;
+  }
+
+  .stat-pill {
+    padding: 0.25rem 0.6rem;
+  }
+
+  .stat-label {
+    font-size: 0.6rem;
+  }
+
+  .stat-value {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 850px) {
+  .system-tag {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .ws-pulse-text {
+    display: none;
+  }
+
+  .ws-pulse-container {
+    padding: 0.35rem 0.5rem;
+  }
+}
+
+@media (max-width: 650px) {
+  .app-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .brand {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .header-stats {
+    justify-content: space-between;
+    width: 100%;
+  }
+}
+
 /* --------------------------------------------------------------------------
    Dashboard Grid Layout
    -------------------------------------------------------------------------- */

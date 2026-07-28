@@ -48,7 +48,7 @@
       <!-- Top Hero Section: File Upload & Quick Presets -->
       <section class="zero-touch-section">
         <div class="drop-zone-card" id="drop-zone">
-          <input type="file" id="file-input" hidden accept=".stl,.step,.3mf,.gcode,.obj,.sldprt">
+          <input type="file" id="file-input" hidden accept=".gcode">
           
           <div class="drop-zone-content">
             <div class="drop-icon-wrapper">
@@ -62,7 +62,7 @@
             
             <div class="drop-text-group">
               <h2 class="drop-title">FILE UPLOAD</h2>
-              <p class="drop-subtitle">Drag & Drop CAD file (.3MF, .STL, .STEP) for instant auto-slicing & farm routing</p>
+              <p class="drop-subtitle">Drag & Drop .GCODE print file for instant automated farm routing</p>
             </div>
           </div>
 
@@ -70,20 +70,20 @@
           <div class="pipeline-overlay hidden" id="pipeline-overlay">
             <div class="pipeline-loader"></div>
             <div class="pipeline-steps">
-              <div class="step-item active" id="step-1"><span class="step-num">01</span> Validating Geometry & Mesh Integrity...</div>
-              <div class="step-item" id="step-2"><span class="step-num">02</span> Auto-Slicing via Klipper Engine (.gcode)...</div>
+              <div class="step-item active" id="step-1"><span class="step-num">01</span> Validating G-Code Syntax & Layer Integrity...</div>
+              <div class="step-item" id="step-2"><span class="step-num">02</span> Parsing Toolpaths & Extrusion Commands (.gcode)...</div>
               <div class="step-item" id="step-3"><span class="step-num">03</span> Calculating Filament Mass & Thermal Requirements...</div>
               <div class="step-item" id="step-4"><span class="step-num">04</span> Finding Available Node & Queueing Job...</div>
             </div>
           </div>
         </div>
 
-        <!-- Quick Preset Drop Container (Word "Drop" removed from button text) -->
+        <!-- Quick Preset Drop Container -->
         <div class="quick-preset-bar">
           <span class="quick-preset-label">SIMULATE FILE UPLOAD:</span>
-          <button class="preset-btn" onclick="triggerPresetDrop(event, 'Turbine_Impeller.3mf', 5400)">+ Turbine_Impeller.3mf</button>
-          <button class="preset-btn" onclick="triggerPresetDrop(event, 'Drone_Chassis.step', 8200)">+ Drone_Chassis.step</button>
-          <button class="preset-btn" onclick="triggerPresetDrop(event, 'Surgical_Guide.stl', 3100)">+ Surgical_Guide.stl</button>
+          <button class="preset-btn" onclick="triggerPresetDrop(event, 'Turbine_Impeller.gcode', 5400)">+ Turbine_Impeller.gcode</button>
+          <button class="preset-btn" onclick="triggerPresetDrop(event, 'Drone_Chassis.gcode', 8200)">+ Drone_Chassis.gcode</button>
+          <button class="preset-btn" onclick="triggerPresetDrop(event, 'Surgical_Guide.gcode', 3100)">+ Surgical_Guide.gcode</button>
         </div>
       </section>
 
@@ -122,7 +122,7 @@
               <span class="queue-count-badge" id="queue-count-badge">0 Pending</span>
             </div>
             <div class="queue-list" id="queue-list">
-              <div class="empty-queue-msg">Queue empty. Drop CAD files above to populate.</div>
+              <div class="empty-queue-msg">Queue empty. Upload .gcode files above to populate.</div>
             </div>
           </div>
 
@@ -219,7 +219,7 @@
           Welcome to the <strong>DASHING TECHNOLOGIES</strong> Autonomous Print Farm Control demo.
         </p>
         <p class="disclaimer-text">
-          Please note that this is an <strong>extremely abstracted demo website</strong> designed for high-level workflow visualization. It does not include a large number of production features, such as (but not limited to) an embedded model slicer or direct low-level machine control.
+          Please note that this is an <strong>extremely abstracted demo website</strong> designed for high-level workflow visualization. It does not include an embedded slicer to process 3D CAD files (.stl, .step, .3mf); it directly accepts pre-sliced <strong>.gcode</strong> print files for automated farm routing.
         </p>
         <p class="disclaimer-text">
           This is a simplified single-page printer dashboard. In a full production deployment, significantly more real-time telemetry data and granular control over both the printed object and printer hardware will exist.

@@ -9,22 +9,17 @@ let currentTelemetry = null;
 let isDemoSimulatorMode = false;
 let demoSimulatorInterval = null;
 
-const PRESET_CAD_SPECS = {
-  "Turbine_Impeller.3mf": { mass_g: 64.2, total_layers: 310, estimated_duration_s: 35 },
-  "Turbine_Impeller_V4.3mf": { mass_g: 64.2, total_layers: 310, estimated_duration_s: 35 },
-  "Turbine_Impeller_v3.3mf": { mass_g: 64.2, total_layers: 310, estimated_duration_s: 35 },
-  "Drone_Chassis.step": { mass_g: 88.5, total_layers: 420, estimated_duration_s: 45 },
-  "Drone_Motor_Chassis.step": { mass_g: 88.5, total_layers: 420, estimated_duration_s: 45 },
-  "Drone_Arm_Mount_Reinforced.stl": { mass_g: 88.5, total_layers: 420, estimated_duration_s: 45 },
-  "Surgical_Guide.stl": { mass_g: 35.0, total_layers: 180, estimated_duration_s: 30 },
-  "Surgical_Guide_Plate.stl": { mass_g: 35.0, total_layers: 180, estimated_duration_s: 30 },
-  "Rocket_Nozzle_Bracket.stl": { mass_g: 52.0, total_layers: 280, estimated_duration_s: 35 },
-  "Cyber_Chassis_Plate.3mf": { mass_g: 110.0, total_layers: 500, estimated_duration_s: 40 },
-  "Aero_Bracket_V2.3mf": { mass_g: 75.0, total_layers: 360, estimated_duration_s: 38 }
+const PRESET_GCODE_SPECS = {
+  "Turbine_Impeller.gcode": { mass_g: 64.2, total_layers: 310, estimated_duration_s: 35 },
+  "Drone_Chassis.gcode": { mass_g: 88.5, total_layers: 420, estimated_duration_s: 45 },
+  "Surgical_Guide.gcode": { mass_g: 35.0, total_layers: 180, estimated_duration_s: 30 },
+  "Rocket_Nozzle_Bracket.gcode": { mass_g: 52.0, total_layers: 280, estimated_duration_s: 35 },
+  "Cyber_Chassis_Plate.gcode": { mass_g: 110.0, total_layers: 500, estimated_duration_s: 40 },
+  "Aero_Bracket_V2.gcode": { mass_g: 75.0, total_layers: 360, estimated_duration_s: 38 }
 };
 
-function getDeterministicCadSpecs(filename) {
-  if (PRESET_CAD_SPECS[filename]) return PRESET_CAD_SPECS[filename];
+function getDeterministicGcodeSpecs(filename) {
+  if (PRESET_GCODE_SPECS[filename]) return PRESET_GCODE_SPECS[filename];
   let h = 0;
   for (let i = 0; i < filename.length; i++) {
     h += filename.charCodeAt(i) * (i + 1);
@@ -34,6 +29,8 @@ function getDeterministicCadSpecs(filename) {
   const estimated_duration_s = 25 + (h % 20);
   return { mass_g, total_layers, estimated_duration_s };
 }
+
+const getDeterministicCadSpecs = getDeterministicGcodeSpecs;
 
 // Standalone Demo Simulator State (Blank Slate Initial State)
 let demoState = {

@@ -3,27 +3,22 @@ import time
 import random
 from typing import Dict, List, Optional
 
-PRESET_CAD_SPECS = {
-    "Turbine_Impeller.3mf": (64.2, 310, 35),
-    "Turbine_Impeller_V4.3mf": (64.2, 310, 35),
-    "Turbine_Impeller_v3.3mf": (64.2, 310, 35),
-    "Drone_Chassis.step": (88.5, 420, 45),
-    "Drone_Motor_Chassis.step": (88.5, 420, 45),
-    "Drone_Arm_Mount_Reinforced.stl": (88.5, 420, 45),
-    "Surgical_Guide.stl": (35.0, 180, 30),
-    "Surgical_Guide_Plate.stl": (35.0, 180, 30),
-    "Rocket_Nozzle_Bracket.stl": (52.0, 280, 35),
-    "Cyber_Chassis_Plate.3mf": (110.0, 500, 40),
-    "Aero_Bracket_V2.3mf": (75.0, 360, 38)
+PRESET_GCODE_SPECS = {
+    "Turbine_Impeller.gcode": (64.2, 310, 35),
+    "Drone_Chassis.gcode": (88.5, 420, 45),
+    "Surgical_Guide.gcode": (35.0, 180, 30),
+    "Rocket_Nozzle_Bracket.gcode": (52.0, 280, 35),
+    "Cyber_Chassis_Plate.gcode": (110.0, 500, 40),
+    "Aero_Bracket_V2.gcode": (75.0, 360, 38)
 }
 
-def get_deterministic_cad_specs(filename: str):
+def get_deterministic_gcode_specs(filename: str):
     """
-    Ensures every CAD model uses the EXACT SAME amount of filament (mass in grams),
+    Ensures every .gcode file uses the EXACT SAME amount of filament (mass in grams),
     total layers, and duration regardless of which printer node prints it.
     """
-    if filename in PRESET_CAD_SPECS:
-        return PRESET_CAD_SPECS[filename]
+    if filename in PRESET_GCODE_SPECS:
+        return PRESET_GCODE_SPECS[filename]
     
     # Hash formula for consistent specs based on filename
     h = sum(ord(c) * (i + 1) for i, c in enumerate(filename))
@@ -31,6 +26,8 @@ def get_deterministic_cad_specs(filename: str):
     total_layers = int(mass_g * 4.0)
     estimated_duration = 25 + (h % 20) # 25s to 45s
     return mass_g, total_layers, estimated_duration
+
+get_deterministic_cad_specs = get_deterministic_gcode_specs
 
 
 class MockPrinterNode:
@@ -298,10 +295,10 @@ class PrintFarmManager:
                     next_job = self.global_queue.pop(0)
                     node.assign_job(next_job)
 
-    def add_cad_file(self, filename: str, file_size_kb: float) -> dict:
+    def add_gcode_file(self, filename: str, file_size_kb: float) -> dict:
         ext = "GCODE"
-        gcode_filename = filename.rsplit(".", 1)[0] + ".gcode" if "." in filename else f"{filename}.gcode"
-        mass_g, total_layers, estimated_duration = get_deterministic_cad_specs(filename)
+        gcode_filename = filename if filename.lower().endswith(".gcode") else (filename.rsplit(".", 1)[0] + ".gcode" if "." in filename else f"{filename}.gcode")
+        mass_g, total_layers, estimated_duration = get_deterministic_gcode_specs(gcode_filename)
 
         job_id = f"JOB-{random.randint(9045, 9999)}"
         new_job = {
@@ -323,6 +320,8 @@ class PrintFarmManager:
         self.tick(0.1)
         
         return new_job
+
+    add_cad_file = add_gcode_file
 
     def get_telemetry(self) -> dict:
         nodes_data = {node_id: node.to_dict() for node_id, node in self.nodes.items()}
