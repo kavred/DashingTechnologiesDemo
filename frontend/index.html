@@ -45,23 +45,15 @@
     <!-- Main Content Layout Grid -->
     <main class="dashboard-grid">
       
-      <!-- Top Hero Section: File Upload & Quick Presets -->
+      <!-- Top Section: Simulate File Upload -->
       <section class="zero-touch-section">
-        <div class="drop-zone-card" id="drop-zone">
-          <input type="file" id="file-input" hidden accept=".gcode">
-          
-          <div class="drop-zone-content">
-            <div class="drop-icon-wrapper">
-              <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-              </svg>
-            </div>
-            
-            <div class="drop-text-group">
-              <h2 class="drop-title">FILE UPLOAD</h2>
-              <p class="drop-subtitle">Drag & Drop .GCODE print file for instant automated farm routing</p>
+        <div class="simulate-card" id="drop-zone">
+          <div class="simulate-card-header">
+            <span class="quick-preset-label">SIMULATE FILE UPLOAD:</span>
+            <div class="preset-buttons-group">
+              <button class="preset-btn" onclick="triggerPresetDrop(event, 'Turbine_Impeller.gcode', 5400)">+ Turbine_Impeller.gcode</button>
+              <button class="preset-btn" onclick="triggerPresetDrop(event, 'Drone_Chassis.gcode', 8200)">+ Drone_Chassis.gcode</button>
+              <button class="preset-btn" onclick="triggerPresetDrop(event, 'Surgical_Guide.gcode', 3100)">+ Surgical_Guide.gcode</button>
             </div>
           </div>
 
@@ -73,14 +65,6 @@
               <p class="processing-subtitle">Parsing toolpaths and auto-routing to optimal printer node</p>
             </div>
           </div>
-        </div>
-
-        <!-- Quick Preset Drop Container -->
-        <div class="quick-preset-bar">
-          <span class="quick-preset-label">SIMULATE FILE UPLOAD:</span>
-          <button class="preset-btn" onclick="triggerPresetDrop(event, 'Turbine_Impeller.gcode', 5400)">+ Turbine_Impeller.gcode</button>
-          <button class="preset-btn" onclick="triggerPresetDrop(event, 'Drone_Chassis.gcode', 8200)">+ Drone_Chassis.gcode</button>
-          <button class="preset-btn" onclick="triggerPresetDrop(event, 'Surgical_Guide.gcode', 3100)">+ Surgical_Guide.gcode</button>
         </div>
       </section>
 

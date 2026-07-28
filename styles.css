@@ -239,86 +239,43 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Zero-Touch CAD Drop Zone Section (Soft Dark Cream Theme)
+   Simulate File Upload Section
    -------------------------------------------------------------------------- */
 .zero-touch-section {
   width: 100%;
 }
 
-.drop-zone-card {
+.simulate-card {
   position: relative;
-  background: linear-gradient(135deg, rgba(34, 27, 24, 0.95) 0%, rgba(44, 35, 31, 0.85) 100%);
-  border: 2px dashed rgba(225, 29, 72, 0.45);
-  border-radius: var(--radius-lg);
-  padding: clamp(1.2rem, 2.2vh, 2.5rem) clamp(1.5rem, 2vw, 3rem);
-  text-align: center;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
-  cursor: pointer;
-}
-
-.drop-zone-card:hover, .drop-zone-card.drag-over {
-  border-color: var(--accent-red);
-  background: linear-gradient(135deg, rgba(225, 29, 72, 0.12) 0%, rgba(190, 18, 60, 0.18) 100%);
-  box-shadow: 0 0 35px rgba(225, 29, 72, 0.25);
-  transform: translateY(-2px);
-}
-
-.drop-zone-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(0.6rem, 1vh, 1.2rem);
-}
-
-.drop-icon-wrapper {
-  position: relative;
-  width: clamp(48px, 5vh, 64px);
-  height: clamp(48px, 5vh, 64px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--accent-red);
-}
-
-.drop-icon {
-  width: 70%;
-  height: 70%;
-}
-
-
-
-.drop-title {
-  font-size: clamp(1.1rem, 1.6vw, 1.5rem);
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: var(--text-main);
-}
-
-.drop-subtitle {
-  font-size: clamp(0.8rem, 0.95vw, 1rem);
-  color: var(--text-muted);
-}
-
-.quick-preset-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-  margin-top: 0.8rem;
-  padding: 0.6rem 1rem;
-  background: #221b18;
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 0.9rem 1.4rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.simulate-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.preset-buttons-group {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
 }
 
 .quick-preset-label {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 700;
   color: var(--text-muted);
+  letter-spacing: 0.5px;
 }
 
 .preset-btn {
@@ -326,8 +283,8 @@ body {
   border: 1px solid #3b2e28;
   color: var(--text-main);
   font-family: var(--font-mono);
-  font-size: clamp(0.7rem, 0.8vw, 0.85rem);
-  padding: 0.4rem 0.9rem;
+  font-size: clamp(0.75rem, 0.85vw, 0.88rem);
+  padding: 0.45rem 1rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -442,15 +399,8 @@ body {
    -------------------------------------------------------------------------- */
 .printer-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr;
   gap: clamp(1.2rem, 1.8vw, 1.8rem);
-  min-height: clamp(350px, 55vh, 650px);
-}
-
-@media (max-width: 768px) {
-  .printer-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 .printer-card {

@@ -916,32 +916,15 @@ function initDragAndDrop() {
   const dropZone = document.getElementById("drop-zone");
   const fileInput = document.getElementById("file-input");
 
-  if (!dropZone || !fileInput) return;
+  if (!dropZone) return;
 
-  dropZone.addEventListener("click", () => fileInput.click());
-
-  dropZone.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    dropZone.classList.add("drag-over");
-  });
-
-  dropZone.addEventListener("dragleave", () => {
-    dropZone.classList.remove("drag-over");
-  });
-
-  dropZone.addEventListener("drop", (e) => {
-    e.preventDefault();
-    dropZone.classList.remove("drag-over");
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleCADFileUpload(e.dataTransfer.files[0]);
-    }
-  });
-
-  fileInput.addEventListener("change", (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      handleCADFileUpload(e.target.files[0]);
-    }
-  });
+  if (fileInput) {
+    fileInput.addEventListener("change", (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        handleCADFileUpload(e.target.files[0]);
+      }
+    });
+  }
 }
 
 function triggerPresetDrop(e, filename, sizeKb) {
