@@ -455,7 +455,7 @@ body {
 /* Telemetry & Filament Spool Gauges Grid (Side-by-Side 3 Columns) */
 .telemetry-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1.6fr;
+  grid-template-columns: 1fr 1.6fr 1fr;
   gap: 1rem;
 }
 

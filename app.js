@@ -637,7 +637,7 @@ function _buildPrinterCardInner(node, statusClass, isEjecting, isWaitingEject, i
       </div>
     ` : ""}
 
-    <!-- Telemetry & Spool Gauge Combined Row (Side-by-side) -->
+    <!-- Telemetry & Spool Gauge Combined Row (Hotend | Spool | Bed Temp) -->
     <div class="telemetry-row">
       <div class="temp-box">
         <div class="temp-header">
@@ -645,14 +645,6 @@ function _buildPrinterCardInner(node, statusClass, isEjecting, isWaitingEject, i
           <span>T: ${node.target_hotend_temp}°C</span>
         </div>
         <div class="temp-readout hotend-color">${node.current_hotend_temp}°C</div>
-      </div>
-
-      <div class="temp-box">
-        <div class="temp-header">
-          <span>BED TEMP</span>
-          <span>T: ${node.target_bed_temp}°C</span>
-        </div>
-        <div class="temp-readout bed-color">${node.current_bed_temp}°C</div>
       </div>
 
       <div class="temp-box card-spool-box">
@@ -670,6 +662,14 @@ function _buildPrinterCardInner(node, statusClass, isEjecting, isWaitingEject, i
           <span>FILAMENT: <strong>${rem}g / ${cap}g</strong></span>
           <span class="spool-pct-val"><strong>${pct}%</strong></span>
         </div>
+      </div>
+
+      <div class="temp-box">
+        <div class="temp-header">
+          <span>BED TEMP</span>
+          <span>T: ${node.target_bed_temp}°C</span>
+        </div>
+        <div class="temp-readout bed-color">${node.current_bed_temp}°C</div>
       </div>
     </div>
 
