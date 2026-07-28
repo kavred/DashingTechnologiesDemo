@@ -563,7 +563,7 @@ function renderPrinterGrid(nodes) {
       spoolTitle.style.color = spool.color;
     }
 
-    const spoolBarFill = card.querySelector(".card-spool-section .spool-bar-fill");
+    const spoolBarFill = card.querySelector(".card-spool-box .spool-bar-fill");
     if (spoolBarFill) {
       spoolBarFill.style.width = `${spool.pct}%`;
       spoolBarFill.style.backgroundColor = spool.color;
@@ -637,7 +637,7 @@ function _buildPrinterCardInner(node, statusClass, isEjecting, isWaitingEject, i
       </div>
     ` : ""}
 
-    <!-- Telemetry Gauges -->
+    <!-- Telemetry & Spool Gauge Combined Row (Side-by-side) -->
     <div class="telemetry-row">
       <div class="temp-box">
         <div class="temp-header">
@@ -646,12 +646,30 @@ function _buildPrinterCardInner(node, statusClass, isEjecting, isWaitingEject, i
         </div>
         <div class="temp-readout hotend-color">${node.current_hotend_temp}°C</div>
       </div>
+
       <div class="temp-box">
         <div class="temp-header">
           <span>BED TEMP</span>
           <span>T: ${node.target_bed_temp}°C</span>
         </div>
         <div class="temp-readout bed-color">${node.current_bed_temp}°C</div>
+      </div>
+
+      <div class="temp-box card-spool-box">
+        <div class="spool-meta-header">
+          <div class="spool-brand-type">
+            <span class="spool-dot" style="background-color: ${spool.color}"></span>
+            <span class="spool-title">SPOOL: <strong style="color: ${spool.color}">${spool.type}</strong></span>
+          </div>
+          <a href="#" class="restock-link" onclick="openRestockModal('${node.node_id}'); return false;">+ Restock</a>
+        </div>
+        <div class="spool-bar-track">
+          <div class="spool-bar-fill" style="width: ${spool.pct}%; background-color: ${spool.color}"></div>
+        </div>
+        <div class="spool-weight-row">
+          <span>FILAMENT: <strong>${rem}g / ${cap}g</strong></span>
+          <span class="spool-pct-val"><strong>${pct}%</strong></span>
+        </div>
       </div>
     </div>
 
@@ -670,24 +688,6 @@ function _buildPrinterCardInner(node, statusClass, isEjecting, isWaitingEject, i
         <span>PROGRESS: <strong>${node.progress}%</strong></span>
         <span>FAN: ${node.fan_rpm} RPM</span>
         <span>RATE: ${node.extruding_rate} mm³/s</span>
-      </div>
-    </div>
-
-    <!-- Integrated Spool & Filament Consumable Section -->
-    <div class="card-spool-section">
-      <div class="spool-meta-header">
-        <div class="spool-brand-type">
-          <span class="spool-dot" style="background-color: ${spool.color}"></span>
-          <span class="spool-title">SPOOL: <strong style="color: ${spool.color}">${spool.type}</strong></span>
-        </div>
-        <a href="#" class="restock-link" onclick="openRestockModal('${node.node_id}'); return false;">+ Restock Spool</a>
-      </div>
-      <div class="spool-bar-track">
-        <div class="spool-bar-fill" style="width: ${spool.pct}%; background-color: ${spool.color}"></div>
-      </div>
-      <div class="spool-weight-row">
-        <span>FILAMENT: <strong>${rem}g / ${cap}g</strong></span>
-        <span class="spool-pct-val"><strong>${pct}%</strong></span>
       </div>
     </div>
 
@@ -916,15 +916,32 @@ function initDragAndDrop() {
   const dropZone = document.getElementById("drop-zone");
   const fileInput = document.getElementById("file-input");
 
-  if (!dropZone) return;
+  if (!dropZone || !fileInput) return;
 
-  if (fileInput) {
-    fileInput.addEventListener("change", (e) => {
-      if (e.target.files && e.target.files.length > 0) {
-        handleCADFileUpload(e.target.files[0]);
-      }
-    });
-  }
+  dropZone.addEventListener("click", () => fileInput.click());
+
+  dropZone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropZone.classList.add("drag-over");
+  });
+
+  dropZone.addEventListener("dragleave", () => {
+    dropZone.classList.remove("drag-over");
+  });
+
+  dropZone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropZone.classList.remove("drag-over");
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleCADFileUpload(e.dataTransfer.files[0]);
+    }
+  });
+
+  fileInput.addEventListener("change", (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      handleCADFileUpload(e.target.files[0]);
+    }
+  });
 }
 
 function triggerPresetDrop(e, filename, sizeKb) {

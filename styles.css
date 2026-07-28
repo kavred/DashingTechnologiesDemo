@@ -239,43 +239,108 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Simulate File Upload Section
+   Zero-Touch CAD Drop Zone Section (Soft Dark Cream Theme)
    -------------------------------------------------------------------------- */
 .zero-touch-section {
   width: 100%;
 }
 
+.drop-zone-card {
+  position: relative;
+  background: linear-gradient(135deg, rgba(34, 27, 24, 0.95) 0%, rgba(44, 35, 31, 0.85) 100%);
+  border: 2px dashed rgba(225, 29, 72, 0.45);
+  border-radius: var(--radius-lg);
+  padding: clamp(1.2rem, 2.2vh, 2.5rem) clamp(1.5rem, 2vw, 3rem);
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.drop-zone-card:hover, .drop-zone-card.drag-over {
+  border-color: var(--accent-red);
+  background: linear-gradient(135deg, rgba(225, 29, 72, 0.12) 0%, rgba(190, 18, 60, 0.18) 100%);
+  box-shadow: 0 0 35px rgba(225, 29, 72, 0.25);
+  transform: translateY(-2px);
+}
+
+.drop-zone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.6rem, 1vh, 1.2rem);
+}
+
+.drop-icon-wrapper {
+  position: relative;
+  width: clamp(48px, 5vh, 64px);
+  height: clamp(48px, 5vh, 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-red);
+}
+
+.drop-icon {
+  width: 70%;
+  height: 70%;
+}
+
+
+
+.drop-title {
+  font-size: clamp(1.1rem, 1.6vw, 1.5rem);
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--text-main);
+}
+
+.drop-subtitle {
+  font-size: clamp(0.8rem, 0.95vw, 1rem);
+  color: var(--text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Top Hero Section: Simulate File Upload
+   -------------------------------------------------------------------------- */
 .simulate-card {
   position: relative;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 0.9rem 1.4rem;
+  padding: clamp(1.2rem, 1.6vw, 1.6rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
   overflow: hidden;
 }
 
 .simulate-card-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
-.preset-buttons-group {
+.simulate-title {
+  font-size: clamp(1.1rem, 1.4vw, 1.4rem);
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--text-main);
+}
+
+.simulate-subtitle {
+  font-family: var(--font-mono);
+  font-size: clamp(0.75rem, 0.85vw, 0.88rem);
+  color: var(--text-muted);
+}
+
+.quick-preset-bar {
   display: flex;
   align-items: center;
   gap: 0.8rem;
   flex-wrap: wrap;
-}
-
-.quick-preset-label {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  letter-spacing: 0.5px;
 }
 
 .preset-btn {
@@ -283,8 +348,8 @@ body {
   border: 1px solid #3b2e28;
   color: var(--text-main);
   font-family: var(--font-mono);
-  font-size: clamp(0.75rem, 0.85vw, 0.88rem);
-  padding: 0.45rem 1rem;
+  font-size: clamp(0.7rem, 0.8vw, 0.85rem);
+  padding: 0.5rem 1rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -296,6 +361,131 @@ body {
   font-weight: 700;
   border-color: var(--accent-red);
   box-shadow: 0 0 15px rgba(225, 29, 72, 0.35);
+}
+
+/* --------------------------------------------------------------------------
+   Printer Cards Grid (4 Nodes - Single Column Spacious Layout)
+   -------------------------------------------------------------------------- */
+.printer-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(1.4rem, 2vw, 2rem);
+  min-height: 400px;
+}
+
+.printer-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: clamp(1.4rem, 2vw, 2rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.printer-card:hover {
+  border-color: var(--border-bright);
+  box-shadow: 0 8px 30px rgba(225, 29, 72, 0.18);
+}
+
+.printer-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 0.7rem;
+}
+
+.node-identity {
+  display: flex;
+  flex-direction: column;
+}
+
+.node-name {
+  font-weight: 700;
+  font-size: clamp(1.05rem, 1.2vw, 1.25rem);
+  color: var(--text-main);
+}
+
+.status-badge {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Status Colors (Soft Dark Cream Theme) */
+.status-badge.idle { background: rgba(201, 186, 168, 0.15); color: var(--text-muted); border: 1px solid var(--border-color); }
+.status-badge.preheating { background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); border: 1px solid var(--accent-amber); }
+.status-badge.printing { background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border: 1px solid var(--accent-emerald); }
+.status-badge.ejecting { background: rgba(225, 29, 72, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); animation: flash 1s infinite alternate; }
+
+@keyframes flash {
+  from { opacity: 0.75; }
+  to { opacity: 1; box-shadow: 0 0 14px rgba(225, 29, 72, 0.4); }
+}
+
+/* Ejecting Swapper Banner */
+.swapper-banner {
+  background: linear-gradient(90deg, rgba(225, 29, 72, 0.2) 0%, rgba(190, 18, 60, 0.25) 100%);
+  border: 1px solid var(--accent-red);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--accent-crimson);
+}
+
+.swapper-banner.waiting-banner {
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.2) 100%);
+  border-color: var(--accent-amber);
+  color: var(--accent-amber);
+}
+
+/* Telemetry & Filament Spool Gauges Grid (Side-by-Side 3 Columns) */
+.telemetry-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.6fr;
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .telemetry-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .card-spool-box {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 600px) {
+  .telemetry-row {
+    grid-template-columns: 1fr;
+  }
+  .card-spool-box {
+    grid-column: span 1;
+  }
+}
+
+.card-spool-box {
+  background: #191412;
+  border: 1px solid #2e2420;
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 0.95rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.4rem;
 }
 
 /* Pipeline Overlay */
@@ -397,11 +587,6 @@ body {
 /* --------------------------------------------------------------------------
    Printer Cards Grid (4 Nodes)
    -------------------------------------------------------------------------- */
-.printer-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: clamp(1.2rem, 1.8vw, 1.8rem);
-}
 
 .printer-card {
   background: var(--bg-card);

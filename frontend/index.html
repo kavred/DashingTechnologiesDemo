@@ -45,16 +45,18 @@
     <!-- Main Content Layout Grid -->
     <main class="dashboard-grid">
       
-      <!-- Top Section: Simulate File Upload -->
+      <!-- Top Hero Section: Simulate File Upload Only -->
       <section class="zero-touch-section">
         <div class="simulate-card" id="drop-zone">
           <div class="simulate-card-header">
-            <span class="quick-preset-label">SIMULATE FILE UPLOAD:</span>
-            <div class="preset-buttons-group">
-              <button class="preset-btn" onclick="triggerPresetDrop(event, 'Turbine_Impeller.gcode', 5400)">+ Turbine_Impeller.gcode</button>
-              <button class="preset-btn" onclick="triggerPresetDrop(event, 'Drone_Chassis.gcode', 8200)">+ Drone_Chassis.gcode</button>
-              <button class="preset-btn" onclick="triggerPresetDrop(event, 'Surgical_Guide.gcode', 3100)">+ Surgical_Guide.gcode</button>
-            </div>
+            <h2 class="simulate-title">SIMULATE FILE UPLOAD</h2>
+            <p class="simulate-subtitle">Select a pre-sliced .GCODE file to dispatch into the automated farm queue</p>
+          </div>
+          
+          <div class="quick-preset-bar">
+            <button class="preset-btn" onclick="triggerPresetDrop(event, 'Turbine_Impeller.gcode', 5400)">+ Turbine_Impeller.gcode</button>
+            <button class="preset-btn" onclick="triggerPresetDrop(event, 'Drone_Chassis.gcode', 8200)">+ Drone_Chassis.gcode</button>
+            <button class="preset-btn" onclick="triggerPresetDrop(event, 'Surgical_Guide.gcode', 3100)">+ Surgical_Guide.gcode</button>
           </div>
 
           <!-- Processing Screen Overlay -->
