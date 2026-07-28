@@ -552,6 +552,36 @@ function renderPrinterGrid(nodes) {
       if (spans[2]) spans[2].textContent = `RATE: ${node.extruding_rate} mm³/s`;
     }
 
+    // Spool Consumable gauge updates inside printer card
+    const spool = node.spool || { remaining_g: 1000, capacity_g: 1000, pct: 100, type: "OEM PLA", color: "#10b981" };
+    const spoolDot = card.querySelector(".spool-dot");
+    if (spoolDot) spoolDot.style.backgroundColor = spool.color;
+
+    const spoolTitle = card.querySelector(".spool-title strong");
+    if (spoolTitle) {
+      spoolTitle.textContent = spool.type;
+      spoolTitle.style.color = spool.color;
+    }
+
+    const spoolBarFill = card.querySelector(".card-spool-section .spool-bar-fill");
+    if (spoolBarFill) {
+      spoolBarFill.style.width = `${spool.pct}%`;
+      spoolBarFill.style.backgroundColor = spool.color;
+    }
+
+    const spoolWeightSpan = card.querySelector(".spool-weight-row span strong");
+    if (spoolWeightSpan) {
+      const rem = typeof spool.remaining_g === 'number' ? spool.remaining_g.toFixed(1) : spool.remaining_g;
+      const cap = typeof spool.capacity_g === 'number' ? spool.capacity_g.toFixed(0) : spool.capacity_g;
+      spoolWeightSpan.textContent = `${rem}g / ${cap}g`;
+    }
+
+    const spoolPctSpan = card.querySelector(".spool-pct-val strong");
+    if (spoolPctSpan) {
+      const pct = typeof spool.pct === 'number' ? spool.pct.toFixed(1) : spool.pct;
+      spoolPctSpan.textContent = `${pct}%`;
+    }
+
     // Action buttons — only rebuild when the logical state category changes
     const actionsContainer = card.querySelector(".card-actions");
     if (actionsContainer) {
@@ -580,6 +610,11 @@ function renderPrinterGrid(nodes) {
 
 // Helper: build the full inner HTML for a new printer card (used only on first creation)
 function _buildPrinterCardInner(node, statusClass, isEjecting, isWaitingEject, isIdle, isPrintActive, job) {
+  const spool = node.spool || { remaining_g: 1000, capacity_g: 1000, pct: 100, type: "OEM PLA", color: "#10b981" };
+  const rem = typeof spool.remaining_g === 'number' ? spool.remaining_g.toFixed(1) : spool.remaining_g;
+  const cap = typeof spool.capacity_g === 'number' ? spool.capacity_g.toFixed(0) : spool.capacity_g;
+  const pct = typeof spool.pct === 'number' ? spool.pct.toFixed(1) : spool.pct;
+
   return `
     <div class="printer-card-header">
       <div class="node-identity">
@@ -635,6 +670,24 @@ function _buildPrinterCardInner(node, statusClass, isEjecting, isWaitingEject, i
         <span>PROGRESS: <strong>${node.progress}%</strong></span>
         <span>FAN: ${node.fan_rpm} RPM</span>
         <span>RATE: ${node.extruding_rate} mm³/s</span>
+      </div>
+    </div>
+
+    <!-- Integrated Spool & Filament Consumable Section -->
+    <div class="card-spool-section">
+      <div class="spool-meta-header">
+        <div class="spool-brand-type">
+          <span class="spool-dot" style="background-color: ${spool.color}"></span>
+          <span class="spool-title">SPOOL: <strong style="color: ${spool.color}">${spool.type}</strong></span>
+        </div>
+        <a href="#" class="restock-link" onclick="openRestockModal('${node.node_id}'); return false;">+ Restock Spool</a>
+      </div>
+      <div class="spool-bar-track">
+        <div class="spool-bar-fill" style="width: ${spool.pct}%; background-color: ${spool.color}"></div>
+      </div>
+      <div class="spool-weight-row">
+        <span>FILAMENT: <strong>${rem}g / ${cap}g</strong></span>
+        <span class="spool-pct-val"><strong>${pct}%</strong></span>
       </div>
     </div>
 
