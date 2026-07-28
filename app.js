@@ -56,7 +56,7 @@ let demoState = {
       elapsed_time_s: 0,
       estimated_duration_s: 0,
       eject_countdown_s: 0,
-      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "OEM PLA", color: "#10b981" },
+      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "Generic ASA", color: "#10b981" },
       plates_ejected: 0,
       current_job: null
     },
@@ -77,7 +77,7 @@ let demoState = {
       elapsed_time_s: 0,
       estimated_duration_s: 0,
       eject_countdown_s: 0,
-      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "OEM PETG", color: "#3b82f6" },
+      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "Generic ASA", color: "#3b82f6" },
       plates_ejected: 0,
       current_job: null
     },
@@ -98,7 +98,7 @@ let demoState = {
       elapsed_time_s: 0,
       estimated_duration_s: 0,
       eject_countdown_s: 0,
-      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "OEM ABS", color: "#a855f7" },
+      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "Generic ASA", color: "#a855f7" },
       plates_ejected: 0,
       current_job: null
     },
@@ -119,7 +119,7 @@ let demoState = {
       elapsed_time_s: 0,
       estimated_duration_s: 0,
       eject_countdown_s: 0,
-      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "OEM TPU", color: "#f59e0b" },
+      spool: { remaining_g: 1000.0, capacity_g: 1000.0, pct: 100.0, type: "Generic ASA", color: "#f59e0b" },
       plates_ejected: 0,
       current_job: null
     }
@@ -637,7 +637,7 @@ function _buildPrinterCardInner(node, statusClass, isEjecting, isWaitingEject, i
       </div>
     ` : ""}
 
-    <!-- Telemetry Row (Hotend | Spool | Bed Temp) - All Equal Height -->
+    <!-- Telemetry & Spool & Progress Combined Row -->
     <div class="telemetry-row">
       <div class="temp-box hotend-temp-box">
         <div class="temp-header">
@@ -647,20 +647,40 @@ function _buildPrinterCardInner(node, statusClass, isEjecting, isWaitingEject, i
         <div class="temp-readout hotend-color">${node.current_hotend_temp}°C</div>
       </div>
 
-      <div class="temp-box card-spool-box">
-        <div class="spool-meta-header">
-          <div class="spool-brand-type">
-            <span class="spool-dot" style="background-color: ${spool.color}"></span>
-            <span class="spool-title">SPOOL: <strong style="color: ${spool.color}">${spool.type}</strong></span>
+      <!-- Center Column: Spool Box + Print Progress Box stacked directly underneath -->
+      <div class="center-spool-column">
+        <div class="temp-box card-spool-box">
+          <div class="spool-meta-header">
+            <div class="spool-brand-type">
+              <span class="spool-dot" style="background-color: ${spool.color}"></span>
+              <span class="spool-title">SPOOL: <strong style="color: ${spool.color}">${spool.type}</strong></span>
+            </div>
+            <a href="#" class="restock-link" onclick="openRestockModal('${node.node_id}'); return false;">+ Restock</a>
           </div>
-          <a href="#" class="restock-link" onclick="openRestockModal('${node.node_id}'); return false;">+ Restock</a>
+          <div class="spool-bar-track">
+            <div class="spool-bar-fill" style="width: ${spool.pct}%; background-color: ${spool.color}"></div>
+          </div>
+          <div class="spool-weight-row">
+            <span>FILAMENT: <strong>${rem}g / ${cap}g</strong></span>
+            <span class="spool-pct-val"><strong>${pct}%</strong></span>
+          </div>
         </div>
-        <div class="spool-bar-track">
-          <div class="spool-bar-fill" style="width: ${spool.pct}%; background-color: ${spool.color}"></div>
-        </div>
-        <div class="spool-weight-row">
-          <span>FILAMENT: <strong>${rem}g / ${cap}g</strong></span>
-          <span class="spool-pct-val"><strong>${pct}%</strong></span>
+
+        <div class="temp-box job-progress-box">
+          <div class="job-info-row">
+            <span class="job-filename">${job ? job.filename : "No active job"}</span>
+            <span class="layer-counter">${node.status === 'PRINTING' ? `Layer ${node.current_layer} / ${node.total_layers}` : "--"}</span>
+          </div>
+
+          <div class="progress-track">
+            <div class="progress-fill" style="width: ${node.progress}%"></div>
+          </div>
+
+          <div class="job-meta-footer">
+            <span>PROGRESS: <strong>${node.progress}%</strong></span>
+            <span>FAN: ${node.fan_rpm} RPM</span>
+            <span>RATE: ${node.extruding_rate} mm³/s</span>
+          </div>
         </div>
       </div>
 
@@ -670,26 +690,6 @@ function _buildPrinterCardInner(node, statusClass, isEjecting, isWaitingEject, i
           <span>T: ${node.target_bed_temp}°C</span>
         </div>
         <div class="temp-readout bed-color">${node.current_bed_temp}°C</div>
-      </div>
-    </div>
-
-    <!-- Progress Row (Directly under Spool Box in Column 2) -->
-    <div class="progress-row">
-      <div class="temp-box job-progress-box">
-        <div class="job-info-row">
-          <span class="job-filename">${job ? job.filename : "No active job"}</span>
-          <span class="layer-counter">${node.status === 'PRINTING' ? `Layer ${node.current_layer} / ${node.total_layers}` : "--"}</span>
-        </div>
-
-        <div class="progress-track">
-          <div class="progress-fill" style="width: ${node.progress}%"></div>
-        </div>
-
-        <div class="job-meta-footer">
-          <span>PROGRESS: <strong>${node.progress}%</strong></span>
-          <span>FAN: ${node.fan_rpm} RPM</span>
-          <span>RATE: ${node.extruding_rate} mm³/s</span>
-        </div>
       </div>
     </div>
 
@@ -869,10 +869,9 @@ function setRestockColor(hex) {
 async function handleRestockSubmit(event) {
   event.preventDefault();
   const nodeId = document.getElementById("restock-node-id").value;
-  const brand = document.getElementById("spool-brand").value;
-  const material = document.getElementById("spool-material").value;
   const color = document.getElementById("spool-color").value;
-  const weight = parseFloat(document.getElementById("spool-weight").value) || 1000.0;
+  const weightEl = document.getElementById("spool-weight");
+  const weight = weightEl ? (parseFloat(weightEl.value) || 1000.0) : 1000.0;
 
   if (isDemoSimulatorMode) {
     const node = demoState.nodes[nodeId];
@@ -881,7 +880,7 @@ async function handleRestockSubmit(event) {
         remaining_g: weight,
         capacity_g: weight,
         pct: 100.0,
-        type: `${brand} ${material}`,
+        type: "Generic ASA",
         color: color
       };
       renderTelemetry(getDemoTelemetrySnapshot());
@@ -890,8 +889,7 @@ async function handleRestockSubmit(event) {
     try {
       const formData = new FormData();
       formData.append("action", "restock_spool");
-      formData.append("brand", brand);
-      formData.append("material", material);
+      formData.append("material", "Generic ASA");
       formData.append("color", color);
       formData.append("weight", weight.toString());
 

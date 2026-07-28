@@ -152,12 +152,12 @@ class PrintFarmManager:
     global queue, and SINGLE-PLATE-AT-A-TIME robotic ejection queue.
     """
     def __init__(self):
-        # Default initial spools match Restock modal options (OEM PLA, OEM PETG, OEM ABS, OEM TPU)
+        # Default initial spools (Generic ASA)
         self.nodes: Dict[str, MockPrinterNode] = {
-            "node-01": MockPrinterNode("node-01", "Node 1", "#10b981", "OEM PLA"),
-            "node-02": MockPrinterNode("node-02", "Node 2", "#3b82f6", "OEM PETG"),
-            "node-03": MockPrinterNode("node-03", "Node 3", "#a855f7", "OEM ABS"),
-            "node-04": MockPrinterNode("node-04", "Node 4", "#f59e0b", "OEM TPU")
+            "node-01": MockPrinterNode("node-01", "Node 1", "#10b981", "Generic ASA"),
+            "node-02": MockPrinterNode("node-02", "Node 2", "#3b82f6", "Generic ASA"),
+            "node-03": MockPrinterNode("node-03", "Node 3", "#a855f7", "Generic ASA"),
+            "node-04": MockPrinterNode("node-04", "Node 4", "#f59e0b", "Generic ASA")
         }
         
         # Single Plate Ejection Queue Lock

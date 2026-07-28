@@ -137,8 +137,7 @@ async def printer_action(
         spool_weight = weight if weight else 1000.0
         node.spool_remaining_g = spool_weight
         node.spool_capacity_g = spool_weight
-        if material:
-            node.spool_type = f"{brand} {material}" if brand else material
+        node.spool_type = "Generic ASA"
         if color:
             node.spool_color = color
     return {"status": "success", "node": node.to_dict()}

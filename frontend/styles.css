@@ -452,33 +452,24 @@ body {
   color: var(--accent-amber);
 }
 
-/* Telemetry & Filament Spool Gauges Grid (Row 1: Hotend | Spool | Bed Temp - Equal Sizing) */
+/* Telemetry & Filament Spool Gauges Grid (Hotend | Center Spool Column | Bed Temp) */
 .telemetry-row {
   display: grid;
   grid-template-columns: 1fr 1.8fr 1fr;
   gap: 1rem;
-  align-items: stretch;
-}
-
-/* Progress Row (Row 2: Positioned under Spool Box in Column 2) */
-.progress-row {
-  display: grid;
-  grid-template-columns: 1fr 1.8fr 1fr;
-  gap: 1rem;
-}
-
-.job-progress-box {
-  grid-column: 2;
+  align-items: start;
 }
 
 @media (max-width: 900px) {
-  .telemetry-row,
-  .progress-row {
+  .telemetry-row {
     grid-template-columns: 1fr;
   }
-  .job-progress-box {
-    grid-column: span 1;
-  }
+}
+
+.center-spool-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .card-spool-box,
@@ -492,6 +483,11 @@ body {
   flex-direction: column;
   justify-content: space-between;
   gap: 0.4rem;
+}
+
+.hotend-temp-box,
+.bed-temp-box {
+  height: fit-content;
 }
 
 .hotend-temp-box,
