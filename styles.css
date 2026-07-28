@@ -287,18 +287,7 @@ body {
   height: 70%;
 }
 
-.pulse-ring {
-  position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  border: 2px solid var(--accent-red);
-  opacity: 0.4;
-  animation: ping 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
 
-@keyframes ping {
-  75%, 100% { transform: scale(1.4); opacity: 0; }
-}
 
 .drop-title {
   font-size: clamp(1.1rem, 1.6vw, 1.5rem);
