@@ -637,9 +637,9 @@ function _buildPrinterCardInner(node, statusClass, isEjecting, isWaitingEject, i
       </div>
     ` : ""}
 
-    <!-- Telemetry & Spool Gauge Combined Row (Hotend | Spool | Bed Temp) -->
+    <!-- Telemetry & Spool & Progress Combined Row -->
     <div class="telemetry-row">
-      <div class="temp-box">
+      <div class="temp-box hotend-temp-box">
         <div class="temp-header">
           <span>HOTEND TEMP</span>
           <span>T: ${node.target_hotend_temp}°C</span>
@@ -647,47 +647,49 @@ function _buildPrinterCardInner(node, statusClass, isEjecting, isWaitingEject, i
         <div class="temp-readout hotend-color">${node.current_hotend_temp}°C</div>
       </div>
 
-      <div class="temp-box card-spool-box">
-        <div class="spool-meta-header">
-          <div class="spool-brand-type">
-            <span class="spool-dot" style="background-color: ${spool.color}"></span>
-            <span class="spool-title">SPOOL: <strong style="color: ${spool.color}">${spool.type}</strong></span>
+      <!-- Center Column: Spool Box + Print Progress Box (Directly Under Spool Box) -->
+      <div class="center-gauge-column">
+        <div class="temp-box card-spool-box">
+          <div class="spool-meta-header">
+            <div class="spool-brand-type">
+              <span class="spool-dot" style="background-color: ${spool.color}"></span>
+              <span class="spool-title">SPOOL: <strong style="color: ${spool.color}">${spool.type}</strong></span>
+            </div>
+            <a href="#" class="restock-link" onclick="openRestockModal('${node.node_id}'); return false;">+ Restock</a>
           </div>
-          <a href="#" class="restock-link" onclick="openRestockModal('${node.node_id}'); return false;">+ Restock</a>
+          <div class="spool-bar-track">
+            <div class="spool-bar-fill" style="width: ${spool.pct}%; background-color: ${spool.color}"></div>
+          </div>
+          <div class="spool-weight-row">
+            <span>FILAMENT: <strong>${rem}g / ${cap}g</strong></span>
+            <span class="spool-pct-val"><strong>${pct}%</strong></span>
+          </div>
         </div>
-        <div class="spool-bar-track">
-          <div class="spool-bar-fill" style="width: ${spool.pct}%; background-color: ${spool.color}"></div>
-        </div>
-        <div class="spool-weight-row">
-          <span>FILAMENT: <strong>${rem}g / ${cap}g</strong></span>
-          <span class="spool-pct-val"><strong>${pct}%</strong></span>
+
+        <div class="temp-box job-progress-box">
+          <div class="job-info-row">
+            <span class="job-filename">${job ? job.filename : "No active job"}</span>
+            <span class="layer-counter">${node.status === 'PRINTING' ? `Layer ${node.current_layer} / ${node.total_layers}` : "--"}</span>
+          </div>
+
+          <div class="progress-track">
+            <div class="progress-fill" style="width: ${node.progress}%"></div>
+          </div>
+
+          <div class="job-meta-footer">
+            <span>PROGRESS: <strong>${node.progress}%</strong></span>
+            <span>FAN: ${node.fan_rpm} RPM</span>
+            <span>RATE: ${node.extruding_rate} mm³/s</span>
+          </div>
         </div>
       </div>
 
-      <div class="temp-box">
+      <div class="temp-box bed-temp-box">
         <div class="temp-header">
           <span>BED TEMP</span>
           <span>T: ${node.target_bed_temp}°C</span>
         </div>
         <div class="temp-readout bed-color">${node.current_bed_temp}°C</div>
-      </div>
-    </div>
-
-    <!-- Print Progress -->
-    <div class="job-progress-container">
-      <div class="job-info-row">
-        <span class="job-filename">${job ? job.filename : "No active job"}</span>
-        <span class="layer-counter">${node.status === 'PRINTING' ? `Layer ${node.current_layer} / ${node.total_layers}` : "--"}</span>
-      </div>
-
-      <div class="progress-track">
-        <div class="progress-fill" style="width: ${node.progress}%"></div>
-      </div>
-
-      <div class="job-meta-footer">
-        <span>PROGRESS: <strong>${node.progress}%</strong></span>
-        <span>FAN: ${node.fan_rpm} RPM</span>
-        <span>RATE: ${node.extruding_rate} mm³/s</span>
       </div>
     </div>
 

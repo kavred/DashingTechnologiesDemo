@@ -452,18 +452,19 @@ body {
   color: var(--accent-amber);
 }
 
-/* Telemetry & Filament Spool Gauges Grid (Side-by-Side 3 Columns) */
+/* Telemetry & Filament Spool Gauges Grid (Hotend | Center Column (Spool + Progress) | Bed Temp) */
 .telemetry-row {
   display: grid;
-  grid-template-columns: 1fr 1.6fr 1fr;
+  grid-template-columns: 1fr 1.8fr 1fr;
   gap: 1rem;
+  align-items: stretch;
 }
 
 @media (max-width: 900px) {
   .telemetry-row {
     grid-template-columns: 1fr 1fr;
   }
-  .card-spool-box {
+  .center-gauge-column {
     grid-column: span 2;
   }
 }
@@ -472,12 +473,19 @@ body {
   .telemetry-row {
     grid-template-columns: 1fr;
   }
-  .card-spool-box {
+  .center-gauge-column {
     grid-column: span 1;
   }
 }
 
-.card-spool-box {
+.center-gauge-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.card-spool-box,
+.job-progress-box {
   background: #191412;
   border: 1px solid #2e2420;
   border-radius: var(--radius-sm);
@@ -486,6 +494,13 @@ body {
   flex-direction: column;
   justify-content: space-between;
   gap: 0.4rem;
+}
+
+.hotend-temp-box,
+.bed-temp-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 /* Pipeline Overlay */
