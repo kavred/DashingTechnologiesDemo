@@ -66,14 +66,12 @@
             </div>
           </div>
 
-          <!-- Pipeline Processing Overlay -->
+          <!-- Processing Screen Overlay -->
           <div class="pipeline-overlay hidden" id="pipeline-overlay">
             <div class="pipeline-loader"></div>
-            <div class="pipeline-steps">
-              <div class="step-item active" id="step-1"><span class="step-num">01</span> Validating G-Code Syntax & Layer Integrity...</div>
-              <div class="step-item" id="step-2"><span class="step-num">02</span> Parsing Toolpaths & Extrusion Commands (.gcode)...</div>
-              <div class="step-item" id="step-3"><span class="step-num">03</span> Calculating Filament Mass & Thermal Requirements...</div>
-              <div class="step-item" id="step-4"><span class="step-num">04</span> Finding Available Node & Queueing Job...</div>
+            <div class="processing-text-group">
+              <h3 class="processing-title">PROCESSING & ROUTING G-CODE...</h3>
+              <p class="processing-subtitle">Parsing toolpaths and auto-routing to optimal printer node</p>
             </div>
           </div>
         </div>

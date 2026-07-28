@@ -902,16 +902,7 @@ async function handleCADFileUpload(file) {
   const overlay = document.getElementById("pipeline-overlay");
   if (overlay) overlay.classList.remove("hidden");
 
-  setStepActive(1);
-  await sleep(500);
-
-  setStepActive(2);
-  await sleep(600);
-
-  setStepActive(3);
-  await sleep(500);
-
-  setStepActive(4);
+  await sleep(750);
 
   if (isDemoSimulatorMode) {
     const gcodeFilename = file.name.includes(".") ? file.name.substring(0, file.name.lastIndexOf(".")) + ".gcode" : file.name + ".gcode";
